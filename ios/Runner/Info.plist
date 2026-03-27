@@ -73,10 +73,18 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.TU_CLIENT_ID</string>
+				<string>com.googleusercontent.apps.81553747238-nvnki2f47259mfd2qbgluhjk2r01dc4j</string>
 			</array>
 		</dict>
 	</array>
+	<key>GIDClientID</key>
+	<string>81553747238-nvnki2f47259mfd2qbgluhjk2r01dc4j.apps.googleusercontent.com</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>com.google.gsh</string>
+	</array>
+	<key>GIDClientID</key>
+	<string>81553747238-nvnki2f47259mfd2qbgluhjk2r01dc4j.apps.googleusercontent.com</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>com.google.gsh</string>
