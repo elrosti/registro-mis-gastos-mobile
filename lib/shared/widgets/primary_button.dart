@@ -27,7 +27,8 @@ class PrimaryButton extends StatelessWidget {
             width: 20,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryContrast),
+              valueColor:
+                  AlwaysStoppedAnimation<Color>(AppColors.primaryContrast),
             ),
           )
         : Row(
@@ -66,14 +67,14 @@ class PrimaryButton extends StatelessWidget {
 
 class SocialButton extends StatelessWidget {
   final String text;
-  final String iconPath;
+  final IconData? icon;
   final VoidCallback? onPressed;
   final bool isLoading;
 
   const SocialButton({
     super.key,
     required this.text,
-    required this.iconPath,
+    this.icon,
     this.onPressed,
     this.isLoading = false,
   });
@@ -100,10 +101,10 @@ class SocialButton extends StatelessWidget {
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset(
-                    iconPath,
-                    height: 24,
-                    width: 24,
+                  const Icon(
+                    Icons.g_mobiledata,
+                    size: 28,
+                    color: AppColors.textPrimary,
                   ),
                   const SizedBox(width: AppSpacing.sm),
                   Text(

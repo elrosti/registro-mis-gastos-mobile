@@ -216,7 +216,7 @@ class _GoogleButton extends StatelessWidget {
       builder: (context, state) {
         return SocialButton(
           text: 'Continuar con Google',
-          iconPath: 'assets/images/google_logo.png',
+          icon: Icons.g_mobiledata,
           onPressed: onPressed,
           isLoading: state is AuthLoading,
         );
