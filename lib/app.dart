@@ -6,6 +6,12 @@ import 'features/auth/presentation/bloc/auth_event.dart';
 import 'features/auth/presentation/bloc/auth_state.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/splash_page.dart';
+import 'features/transactions/presentation/bloc/transaction_bloc.dart';
+import 'features/transactions/presentation/bloc/transaction_event.dart';
+import 'features/transactions/presentation/pages/home_page.dart';
+import 'features/transactions/presentation/pages/add_transaction_page.dart';
+import 'features/profile/presentation/pages/summary_page.dart';
+import 'features/profile/presentation/pages/profile_page.dart';
 import 'injection_container.dart';
 
 class App extends StatelessWidget {
@@ -13,8 +19,15 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<AuthBloc>(
-      create: (_) => sl<AuthBloc>()..add(const AuthCheckRequested()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AuthBloc>(
+          create: (_) => sl<AuthBloc>()..add(const AuthCheckRequested()),
+        ),
+        BlocProvider<TransactionBloc>(
+          create: (_) => sl<TransactionBloc>()..add(const TransactionFetchRequested()),
+        ),
+      ],
       child: MaterialApp(
         title: 'Registro Mis Gastos',
         debugShowCheckedModeBanner: false,
@@ -54,19 +67,17 @@ class MainNavigationPage extends StatefulWidget {
 class _MainNavigationPageState extends State<MainNavigationPage> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = const [
-    HomePage(),
-    AddTransactionPage(),
-    SummaryPage(),
-    ProfilePage(),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: _pages,
+        children: const [
+          HomePage(),
+          AddTransactionPage(),
+          SummaryPage(),
+          ProfilePage(),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
@@ -97,76 +108,6 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
             label: 'Más',
           ),
         ],
-      ),
-    );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mis Gastos'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: () {},
-          ),
-        ],
-      ),
-      body: const Center(
-        child: Text('Home - Lista de transacciones'),
-      ),
-    );
-  }
-}
-
-class AddTransactionPage extends StatelessWidget {
-  const AddTransactionPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Agregar Gasto'),
-      ),
-      body: const Center(
-        child: Text('Formulario de transacción'),
-      ),
-    );
-  }
-}
-
-class SummaryPage extends StatelessWidget {
-  const SummaryPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Resumen'),
-      ),
-      body: const Center(
-        child: Text('Resumen mensual'),
-      ),
-    );
-  }
-}
-
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Perfil'),
-      ),
-      body: const Center(
-        child: Text('Perfil de usuario'),
       ),
     );
   }

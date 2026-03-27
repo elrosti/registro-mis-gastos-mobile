@@ -9,6 +9,12 @@ import 'features/auth/data/repositories/auth_repository_impl.dart';
 import 'features/auth/domain/repositories/auth_repository.dart';
 import 'features/auth/domain/usecases/auth_usecases.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/transactions/data/datasources/transaction_remote_datasource.dart';
+import 'features/transactions/data/datasources/category_remote_datasource.dart';
+import 'features/transactions/data/repositories/transaction_repository_impl.dart';
+import 'features/transactions/domain/repositories/transaction_repository.dart';
+import 'features/transactions/domain/usecases/transaction_usecases.dart';
+import 'features/transactions/presentation/bloc/transaction_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -60,6 +66,43 @@ Future<void> initDependencies() async {
       logoutUseCase: sl(),
       checkAuthStatusUseCase: sl(),
       getCurrentUserUseCase: sl(),
+    ),
+  );
+
+  // Transactions - Data Sources
+  sl.registerLazySingleton<TransactionRemoteDataSource>(
+    () => TransactionRemoteDataSourceImpl(apiClient: sl()),
+  );
+
+  sl.registerLazySingleton<CategoryRemoteDataSource>(
+    () => CategoryRemoteDataSourceImpl(apiClient: sl()),
+  );
+
+  // Transactions - Repositories
+  sl.registerLazySingleton<TransactionRepository>(
+    () => TransactionRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  sl.registerLazySingleton<CategoryRepository>(
+    () => CategoryRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Transactions - Use Cases
+  sl.registerLazySingleton(() => GetTransactions(sl()));
+  sl.registerLazySingleton(() => GetTransactionById(sl()));
+  sl.registerLazySingleton(() => CreateTransaction(sl()));
+  sl.registerLazySingleton(() => UpdateTransaction(sl()));
+  sl.registerLazySingleton(() => DeleteTransaction(sl()));
+  sl.registerLazySingleton(() => GetCategories(sl()));
+  sl.registerLazySingleton(() => GetMostUsedCategories(sl()));
+
+  // Transactions - BLoC
+  sl.registerFactory<TransactionBloc>(
+    () => TransactionBloc(
+      getTransactionsUseCase: sl(),
+      createTransactionUseCase: sl(),
+      updateTransactionUseCase: sl(),
+      deleteTransactionUseCase: sl(),
     ),
   );
 }
