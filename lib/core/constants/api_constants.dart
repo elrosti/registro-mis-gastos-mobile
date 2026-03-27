@@ -1,11 +1,10 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 class ApiConstants {
   ApiConstants._();
 
-  // Base URL - should be overridden by environment
-  static const String baseUrl = String.fromEnvironment(
-    'API_BASE_URL',
-    defaultValue: 'http://localhost:8080/api',
-  );
+  static String get baseUrl =>
+      dotenv.env['API_BASE_URL'] ?? 'http://localhost:8080/api';
 
   // Auth endpoints
   static const String authRegister = '/auth/register';
