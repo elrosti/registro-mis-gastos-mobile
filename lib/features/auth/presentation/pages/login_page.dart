@@ -214,11 +214,16 @@ class _GoogleButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
-        return SocialButton(
-          text: 'Continuar con Google',
-          icon: Icons.g_mobiledata,
-          onPressed: onPressed,
-          isLoading: state is AuthLoading,
+        final isLoading = state is AuthLoading;
+        return ElevatedButton.icon(
+          onPressed: isLoading ? null : onPressed,
+          icon: const Icon(Icons.g_mobiledata),
+          label: const Text('Continuar con Google'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.black87,
+            minimumSize: const Size(double.infinity, 48),
+          ),
         );
       },
     );
