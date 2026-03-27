@@ -85,6 +85,7 @@ class PasswordField extends StatefulWidget {
   final TextEditingController? controller;
   final String? Function(String?)? validator;
   final void Function(String)? onChanged;
+  final void Function(String)? onSubmitted;
 
   const PasswordField({
     super.key,
@@ -92,6 +93,7 @@ class PasswordField extends StatefulWidget {
     this.controller,
     this.validator,
     this.onChanged,
+    this.onSubmitted,
   });
 
   @override
@@ -109,6 +111,7 @@ class _PasswordFieldState extends State<PasswordField> {
       validator: widget.validator,
       obscureText: _obscureText,
       onChanged: widget.onChanged,
+      onSubmitted: widget.onSubmitted,
       keyboardType: TextInputType.visiblePassword,
       suffixIcon: IconButton(
         icon: Icon(

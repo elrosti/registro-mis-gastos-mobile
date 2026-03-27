@@ -4,7 +4,7 @@ import 'app_colors.dart';
 class AppTypography {
   AppTypography._();
 
-  static const String fontFamily = null;
+  static const String? fontFamily = null;
 
   static TextStyle get headlineLarge => const TextStyle(
         fontFamily: fontFamily,

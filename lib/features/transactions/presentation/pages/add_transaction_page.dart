@@ -9,6 +9,7 @@ import '../../../../shared/widgets/text_input_field.dart';
 import '../../domain/entities/transaction.dart';
 import '../bloc/transaction_bloc.dart';
 import '../bloc/transaction_event.dart';
+import '../bloc/transaction_state.dart';
 import '../widgets/amount_input.dart';
 import '../widgets/category_selector.dart';
 
@@ -39,15 +40,60 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   bool get isEditing => widget.transaction != null;
 
   final List<Category> _mockCategories = [
-    const Category(id: '1', name: 'Comida', type: 'EXPENSE', icon: 'restaurant', color: '#FF6B6B'),
-    const Category(id: '2', name: 'Transporte', type: 'EXPENSE', icon: 'directions_car', color: '#4ECDC4'),
-    const Category(id: '3', name: 'Hogar', type: 'EXPENSE', icon: 'home', color: '#45B7D1'),
-    const Category(id: '4', name: 'Salud', type: 'EXPENSE', icon: 'local_hospital', color: '#96CEB4'),
-    const Category(id: '5', name: 'Entretenimiento', type: 'EXPENSE', icon: 'entertainment', color: '#DDA0DD'),
-    const Category(id: '6', name: 'Compras', type: 'EXPENSE', icon: 'shopping_cart', color: '#98D8C8'),
-    const Category(id: '7', name: 'Salario', type: 'INCOME', icon: 'work', color: '#22C55E'),
-    const Category(id: '8', name: 'Freelance', type: 'INCOME', icon: 'laptop', color: '#3B82F6'),
-    const Category(id: '9', name: 'Inversiones', type: 'INCOME', icon: 'trending_up', color: '#8B5CF6'),
+    const Category(
+        id: '1',
+        name: 'Comida',
+        type: 'EXPENSE',
+        icon: 'restaurant',
+        color: '#FF6B6B'),
+    const Category(
+        id: '2',
+        name: 'Transporte',
+        type: 'EXPENSE',
+        icon: 'directions_car',
+        color: '#4ECDC4'),
+    const Category(
+        id: '3',
+        name: 'Hogar',
+        type: 'EXPENSE',
+        icon: 'home',
+        color: '#45B7D1'),
+    const Category(
+        id: '4',
+        name: 'Salud',
+        type: 'EXPENSE',
+        icon: 'local_hospital',
+        color: '#96CEB4'),
+    const Category(
+        id: '5',
+        name: 'Entretenimiento',
+        type: 'EXPENSE',
+        icon: 'entertainment',
+        color: '#DDA0DD'),
+    const Category(
+        id: '6',
+        name: 'Compras',
+        type: 'EXPENSE',
+        icon: 'shopping_cart',
+        color: '#98D8C8'),
+    const Category(
+        id: '7',
+        name: 'Salario',
+        type: 'INCOME',
+        icon: 'work',
+        color: '#22C55E'),
+    const Category(
+        id: '8',
+        name: 'Freelance',
+        type: 'INCOME',
+        icon: 'laptop',
+        color: '#3B82F6'),
+    const Category(
+        id: '9',
+        name: 'Inversiones',
+        type: 'INCOME',
+        icon: 'trending_up',
+        color: '#8B5CF6'),
   ];
 
   @override
@@ -202,9 +248,8 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 CategorySelector(
-                  categories: _mockCategories
-                      .where((c) => c.type == _type)
-                      .toList(),
+                  categories:
+                      _mockCategories.where((c) => c.type == _type).toList(),
                   selectedCategoryId: _selectedCategoryId,
                   onCategorySelected: (category) {
                     setState(() => _selectedCategoryId = category.id);
@@ -254,7 +299,8 @@ class _TypeSelector extends StatelessWidget {
                   color: selectedType == 'EXPENSE'
                       ? AppColors.errorMain.withOpacity(0.1)
                       : Colors.transparent,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium - 2),
+                  borderRadius:
+                      BorderRadius.circular(AppSpacing.radiusMedium - 2),
                 ),
                 child: Text(
                   'Gasto',
@@ -278,7 +324,8 @@ class _TypeSelector extends StatelessWidget {
                   color: selectedType == 'INCOME'
                       ? AppColors.successMain.withOpacity(0.1)
                       : Colors.transparent,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMedium - 2),
+                  borderRadius:
+                      BorderRadius.circular(AppSpacing.radiusMedium - 2),
                 ),
                 child: Text(
                   'Ingreso',
@@ -340,7 +387,8 @@ class _DateSelector extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.calendar_today, color: AppColors.textSecondary),
+                const Icon(Icons.calendar_today,
+                    color: AppColors.textSecondary),
                 const SizedBox(width: AppSpacing.md),
                 Text(
                   DateFormatter.formatDate(selectedDate),

@@ -3,7 +3,6 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 
 class ConnectivityService {
   final Connectivity _connectivity;
-  StreamSubscription<List<ConnectivityResult>>? _subscription;
 
   ConnectivityService({Connectivity? connectivity})
       : _connectivity = connectivity ?? Connectivity();
@@ -17,14 +16,9 @@ class ConnectivityService {
     return _connectivity.onConnectivityChanged.map(_hasConnection);
   }
 
-  bool _hasConnection(List<ConnectivityResult> results) {
-    return results.any((r) =>
-        r == ConnectivityResult.mobile ||
-        r == ConnectivityResult.wifi ||
-        r == ConnectivityResult.ethernet);
-  }
-
-  void dispose() {
-    _subscription?.cancel();
+  bool _hasConnection(ConnectivityResult result) {
+    return result == ConnectivityResult.mobile ||
+        result == ConnectivityResult.wifi ||
+        result == ConnectivityResult.ethernet;
   }
 }

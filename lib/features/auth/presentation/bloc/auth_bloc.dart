@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/auth_usecases.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
@@ -10,6 +11,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final Logout logoutUseCase;
   final CheckAuthStatus checkAuthStatusUseCase;
   final GetCurrentUser getCurrentUserUseCase;
+  final LoginWithGoogle loginWithGoogleUseCase;
   final GoogleSignIn _googleSignIn;
 
   AuthBloc({
@@ -18,6 +20,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.logoutUseCase,
     required this.checkAuthStatusUseCase,
     required this.getCurrentUserUseCase,
+    required this.loginWithGoogleUseCase,
     GoogleSignIn? googleSignIn,
   })  : _googleSignIn = googleSignIn ??
             GoogleSignIn(
@@ -112,7 +115,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         return;
       }
 
-      final result = await LoginWithGoogle(null).call(
+      final result = await loginWithGoogleUseCase.call(
         idToken: googleAuth.idToken!,
         accessToken: googleAuth.accessToken ?? '',
         state: '',

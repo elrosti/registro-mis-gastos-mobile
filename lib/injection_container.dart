@@ -66,6 +66,7 @@ Future<void> initDependencies() async {
       logoutUseCase: sl(),
       checkAuthStatusUseCase: sl(),
       getCurrentUserUseCase: sl(),
+      loginWithGoogleUseCase: sl(),
     ),
   );
 

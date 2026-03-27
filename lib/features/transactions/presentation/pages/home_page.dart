@@ -12,7 +12,7 @@ import '../bloc/transaction_event.dart';
 import '../bloc/transaction_state.dart';
 import '../widgets/transaction_list_item.dart';
 import '../widgets/summary_header.dart';
-import '../widgets/transaction_filters.dart';
+import '../widgets/transaction_filters.dart' as widgets;
 import 'add_transaction_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -151,7 +151,7 @@ class _HomePageState extends State<HomePage> {
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.md),
-              child: TransactionFilters(
+              child: widgets.TransactionFilters(
                 selectedType: filters?.type,
                 onTypeChanged: (type) {
                   context.read<TransactionBloc>().add(
@@ -298,7 +298,8 @@ class _HomePageState extends State<HomePage> {
     final confirmed = await ConfirmationDialog.show(
       context: context,
       title: 'Eliminar transacción',
-      message: '¿Estás seguro de que deseas eliminar "${transaction.shortName}"?',
+      message:
+          '¿Estás seguro de que deseas eliminar "${transaction.shortName}"?',
       confirmText: 'Eliminar',
       isDestructive: true,
     );

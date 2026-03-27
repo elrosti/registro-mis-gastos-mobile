@@ -6,10 +6,10 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../shared/widgets/loading_shimmer.dart';
 import '../../../../shared/widgets/error_state.dart';
-import '../bloc/transaction_bloc.dart';
-import '../bloc/transaction_event.dart';
-import '../bloc/transaction_state.dart';
-import '../widgets/summary_header.dart';
+import '../../../transactions/presentation/bloc/transaction_bloc.dart';
+import '../../../transactions/presentation/bloc/transaction_event.dart';
+import '../../../transactions/presentation/bloc/transaction_state.dart';
+import '../../../transactions/presentation/widgets/summary_header.dart';
 
 class SummaryPage extends StatefulWidget {
   const SummaryPage({super.key});
@@ -149,7 +149,8 @@ class _MonthSelector extends StatelessWidget {
                 selectedMonth.year,
                 selectedMonth.month + 1,
               );
-              if (nextMonth.isBefore(DateTime.now().add(const Duration(days: 1)))) {
+              if (nextMonth
+                  .isBefore(DateTime.now().add(const Duration(days: 1)))) {
                 onMonthChanged(nextMonth);
               }
             },
@@ -273,7 +274,7 @@ class _CategoryBreakdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final categoryTotals = _groupByCategory();
-    
+
     if (categoryTotals.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -301,7 +302,7 @@ class _CategoryBreakdown extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           ...sortedCategories.take(5).map((entry) {
-            final percentage = totalExpense > 0 
+            final percentage = totalExpense > 0
                 ? (entry.value / totalExpense * 100).toStringAsFixed(1)
                 : '0';
             return _CategoryBar(
@@ -362,7 +363,8 @@ class _CategoryBar extends StatelessWidget {
           LinearProgressIndicator(
             value: percentage / 100,
             backgroundColor: AppColors.borderLight,
-            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryMain),
+            valueColor:
+                const AlwaysStoppedAnimation<Color>(AppColors.primaryMain),
             minHeight: 8,
             borderRadius: BorderRadius.circular(4),
           ),

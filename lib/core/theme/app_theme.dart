@@ -37,7 +37,7 @@ class AppTheme {
         type: BottomNavigationBarType.fixed,
         elevation: 8,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.backgroundPaper,
         elevation: 0,
         shape: RoundedRectangleBorder(
@@ -101,9 +101,12 @@ class AppTheme {
           borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
           borderSide: const BorderSide(color: AppColors.errorMain, width: 2),
         ),
-        labelStyle: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
-        hintStyle: AppTypography.bodyMedium.copyWith(color: AppColors.textDisabled),
-        errorStyle: AppTypography.labelSmall.copyWith(color: AppColors.errorMain),
+        labelStyle:
+            AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+        hintStyle:
+            AppTypography.bodyMedium.copyWith(color: AppColors.textDisabled),
+        errorStyle:
+            AppTypography.labelSmall.copyWith(color: AppColors.errorMain),
       ),
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.backgroundPaper,
@@ -131,7 +134,8 @@ class AppTheme {
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColors.textPrimary,
-        contentTextStyle: AppTypography.bodyMedium.copyWith(color: AppColors.textInverse),
+        contentTextStyle:
+            AppTypography.bodyMedium.copyWith(color: AppColors.textInverse),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
