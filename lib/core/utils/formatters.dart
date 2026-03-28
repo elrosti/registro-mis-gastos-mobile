@@ -32,7 +32,21 @@ class DateFormatter {
   }
 
   static String formatMonthYear(DateTime date) {
-    return DateFormat('MMMM yyyy', 'es_ES').format(date).capitalize();
+    final months = [
+      'enero',
+      'febrero',
+      'marzo',
+      'abril',
+      'mayo',
+      'junio',
+      'julio',
+      'agosto',
+      'septiembre',
+      'octubre',
+      'noviembre',
+      'diciembre'
+    ];
+    return '${months[date.month - 1]} ${date.year}';
   }
 
   static String formatTime(DateTime date) {
@@ -50,7 +64,16 @@ class DateFormatter {
     } else if (dateOnly == yesterday) {
       return 'Ayer';
     } else if (now.difference(date).inDays < 7) {
-      return DateFormat('EEEE', 'es_ES').format(date).capitalize();
+      final weekdays = [
+        'lunes',
+        'martes',
+        'miércoles',
+        'jueves',
+        'viernes',
+        'sábado',
+        'domingo'
+      ];
+      return weekdays[date.weekday - 1].capitalize();
     }
     return formatDate(date);
   }

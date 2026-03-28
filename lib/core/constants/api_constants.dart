@@ -4,7 +4,7 @@ class ApiConstants {
   ApiConstants._();
 
   static String get baseUrl =>
-      dotenv.env['API_BASE_URL'] ?? 'http://localhost:8080/api';
+      dotenv.env['API_BASE_URL'] ?? 'http://192.168.68.62:8081/api';
 
   // Auth endpoints
   static const String authRegister = '/auth/register';

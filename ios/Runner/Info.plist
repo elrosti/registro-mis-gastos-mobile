@@ -83,11 +83,5 @@
 	<array>
 		<string>com.google.gsh</string>
 	</array>
-	<key>GIDClientID</key>
-	<string>81553747238-nvnki2f47259mfd2qbgluhjk2r01dc4j.apps.googleusercontent.com</string>
-	<key>LSApplicationQueriesSchemes</key>
-	<array>
-		<string>com.google.gsh</string>
-	</array>
 </dict>
 </plist>

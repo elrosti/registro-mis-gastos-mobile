@@ -157,6 +157,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
               categoryId: _selectedCategoryId,
             ),
           );
+      Navigator.of(context).pop(true);
     } else {
       context.read<TransactionBloc>().add(
             TransactionCreateRequested(
@@ -184,9 +185,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
       ),
       body: BlocListener<TransactionBloc, TransactionState>(
         listener: (context, state) {
-          if (state is TransactionOperationSuccess) {
-            Navigator.of(context).pop();
-          } else if (state is TransactionError) {
+          if (state is TransactionError) {
             setState(() => _isLoading = false);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -297,7 +296,7 @@ class _TypeSelector extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                 decoration: BoxDecoration(
                   color: selectedType == 'EXPENSE'
-                      ? AppColors.errorMain.withOpacity(0.1)
+                      ? AppColors.errorMain.withAlpha(25)
                       : Colors.transparent,
                   borderRadius:
                       BorderRadius.circular(AppSpacing.radiusMedium - 2),
@@ -322,7 +321,7 @@ class _TypeSelector extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                 decoration: BoxDecoration(
                   color: selectedType == 'INCOME'
-                      ? AppColors.successMain.withOpacity(0.1)
+                      ? AppColors.successMain.withAlpha(25)
                       : Colors.transparent,
                   borderRadius:
                       BorderRadius.circular(AppSpacing.radiusMedium - 2),

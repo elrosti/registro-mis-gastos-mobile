@@ -128,17 +128,14 @@ class _CategoryIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = transaction.category?.color != null
-        ? Color(int.parse(transaction.category!.color!.replaceFirst('#', '0xFF')))
-        : AppColors.primaryMain;
-
+    final color = _parseCategoryColor(transaction.category?.color);
     final iconData = _getIconData(transaction.category?.icon);
 
     return Container(
       width: AppSpacing.avatarSize,
       height: AppSpacing.avatarSize,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withAlpha(25),
         shape: BoxShape.circle,
       ),
       child: Icon(
@@ -147,6 +144,18 @@ class _CategoryIcon extends StatelessWidget {
         size: 20,
       ),
     );
+  }
+
+  Color _parseCategoryColor(String? colorString) {
+    if (colorString == null || colorString.isEmpty) {
+      return AppColors.primaryMain;
+    }
+    try {
+      final hexColor = colorString.replaceFirst('#', '0xFF');
+      return Color(int.parse(hexColor));
+    } catch (_) {
+      return AppColors.primaryMain;
+    }
   }
 
   IconData _getIconData(String? iconName) {

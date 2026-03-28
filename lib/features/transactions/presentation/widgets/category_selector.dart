@@ -86,7 +86,7 @@ class _CategoryCard extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.1) : AppColors.backgroundPaper,
+          color: isSelected ? color.withAlpha(25) : AppColors.backgroundPaper,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
           border: Border.all(
             color: isSelected ? color : AppColors.borderMain,
@@ -100,7 +100,7 @@ class _CategoryCard extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.2),
+                color: color.withAlpha(51),
                 shape: BoxShape.circle,
               ),
               child: Icon(

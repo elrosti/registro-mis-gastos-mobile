@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/network/api_client.dart';
@@ -82,16 +81,23 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
       );
 
       final data = response.data;
+      List<dynamic>? content;
+
       if (data is List) {
-        return data.map((json) => TransactionModel.fromJson(json)).toList();
+        content = data;
+      } else if (data is Map<String, dynamic>) {
+        content = data['content'] as List<dynamic>?;
+        content ??= data['data'] as List<dynamic>?;
       }
-      
-      final content = data['content'] ?? data['data'] ?? data;
-      if (content is List) {
-        return content.map((json) => TransactionModel.fromJson(json)).toList();
+
+      if (content == null) {
+        return [];
       }
-      
-      return [];
+
+      return content
+          .map(
+              (json) => TransactionModel.fromJson(json as Map<String, dynamic>))
+          .toList();
     } on ServerException {
       rethrow;
     } catch (e) {
@@ -164,7 +170,8 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
       if (amount != null) data['amount'] = amount;
       if (currency != null) data['currency'] = currency;
       if (transactionDate != null) {
-        data['transactionDate'] = transactionDate.toIso8601String().split('T')[0];
+        data['transactionDate'] =
+            transactionDate.toIso8601String().split('T')[0];
       }
       if (categoryId != null) data['categoryId'] = categoryId;
       if (tagIds != null) data['tagIds'] = tagIds;

@@ -30,7 +30,8 @@ abstract class AuthRemoteDataSource {
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final ApiClient _apiClient;
 
-  AuthRemoteDataSourceImpl({required ApiClient apiClient}) : _apiClient = apiClient;
+  AuthRemoteDataSourceImpl({required ApiClient apiClient})
+      : _apiClient = apiClient;
 
   @override
   Future<AuthResponseModel> register({
@@ -86,11 +87,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }) async {
     try {
       final response = await _apiClient.post(
-        '${ApiConstants.authOAuthToken}/google',
+        '/auth/oauth/mobile/login/google',
         data: {
           'idToken': idToken,
           'accessToken': accessToken,
-          'state': state,
         },
       );
       return AuthResponseModel.fromJson(response.data);
@@ -114,7 +114,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<GoogleOAuthResponseModel> getGoogleOAuthUrl({bool rememberMe = false}) async {
+  Future<GoogleOAuthResponseModel> getGoogleOAuthUrl(
+      {bool rememberMe = false}) async {
     try {
       final response = await _apiClient.get(
         '${ApiConstants.authOAuthUrl}/google',

@@ -57,5 +57,5 @@ class AppColors {
       isIncome ? successMain : errorMain;
 
   static Color getTransactionBackgroundColor(bool isIncome) =>
-      isIncome ? successLight.withOpacity(0.1) : errorLight.withOpacity(0.1);
+      isIncome ? successLight.withAlpha(25) : errorLight.withAlpha(25);
 }

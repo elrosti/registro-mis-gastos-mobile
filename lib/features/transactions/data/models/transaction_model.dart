@@ -19,33 +19,44 @@ class TransactionModel extends Transaction {
   factory TransactionModel.fromJson(Map<String, dynamic> json) {
     return TransactionModel(
       id: json['id']?.toString() ?? '',
-      type: json['type'] ?? 'EXPENSE',
-      shortName: json['shortName'] ?? json['short_name'] ?? '',
-      description: json['description'],
+      type: json['type']?.toString() ?? 'EXPENSE',
+      shortName:
+          json['shortName']?.toString() ?? json['short_name']?.toString() ?? '',
+      description: json['description']?.toString(),
       amount: (json['amount'] is String)
-          ? double.parse(json['amount'])
-          : (json['amount'] as num?)?.toDouble() ?? 0.0,
-      currency: json['currency'] ?? 'UYU',
-      transactionDate: json['transactionDate'] != null ||
-              json['transaction_date'] != null
-          ? DateTime.parse(json['transactionDate'] ?? json['transaction_date'])
-          : DateTime.now(),
-      categoryId: json['categoryId']?.toString() ?? json['category_id']?.toString(),
+          ? double.tryParse(json['amount'].toString()) ?? 0.0
+          : (json['amount'] is num)
+              ? json['amount'].toDouble()
+              : 0.0,
+      currency: json['currency']?.toString() ?? 'UYU',
+      transactionDate:
+          json['transactionDate'] != null || json['transaction_date'] != null
+              ? DateTime.tryParse(json['transactionDate']?.toString() ??
+                      json['transaction_date']?.toString() ??
+                      '') ??
+                  DateTime.now()
+              : DateTime.now(),
+      categoryId:
+          json['categoryId']?.toString() ?? json['category_id']?.toString(),
       category: json['category'] != null
-          ? CategoryModel.fromJson(json['category'])
+          ? CategoryModel.fromJson(json['category'] as Map<String, dynamic>)
           : null,
       tags: json['tags'] != null
           ? (json['tags'] as List)
-              .map((t) => TagModel.fromJson(t))
+              .map((t) => TagModel.fromJson(t as Map<String, dynamic>))
               .toList()
           : null,
       createdAt: json['createdAt'] != null || json['created_at'] != null
-          ? DateTime.parse(json['createdAt'] ?? json['created_at'])
+          ? DateTime.tryParse(json['createdAt']?.toString() ??
+              json['created_at']?.toString() ??
+              '')
           : null,
-      lastModifiedAt: json['lastModifiedAt'] != null ||
-              json['last_modified_at'] != null
-          ? DateTime.parse(json['lastModifiedAt'] ?? json['last_modified_at'])
-          : null,
+      lastModifiedAt:
+          json['lastModifiedAt'] != null || json['last_modified_at'] != null
+              ? DateTime.tryParse(json['lastModifiedAt']?.toString() ??
+                  json['last_modified_at']?.toString() ??
+                  '')
+              : null,
     );
   }
 
@@ -78,12 +89,13 @@ class CategoryModel extends Category {
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
     return CategoryModel(
       id: json['id']?.toString() ?? '',
-      name: json['name'] ?? '',
-      type: json['type'] ?? 'EXPENSE',
-      icon: json['icon'],
-      color: json['color'],
+      name: json['name']?.toString() ?? '',
+      type: json['type']?.toString() ?? 'EXPENSE',
+      icon: json['icon']?.toString(),
+      color: json['color']?.toString(),
       parentId: json['parentId']?.toString() ?? json['parent_id']?.toString(),
-      isHidden: json['isHidden'] ?? json['is_hidden'] ?? false,
+      isHidden:
+          json['isHidden'] as bool? ?? json['is_hidden'] as bool? ?? false,
     );
   }
 
@@ -109,7 +121,7 @@ class TagModel extends Tag {
   factory TagModel.fromJson(Map<String, dynamic> json) {
     return TagModel(
       id: json['id']?.toString() ?? '',
-      name: json['name'] ?? '',
+      name: json['name']?.toString() ?? '',
     );
   }
 

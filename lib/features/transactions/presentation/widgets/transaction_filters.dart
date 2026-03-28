@@ -80,7 +80,7 @@ class _FilterChip extends StatelessWidget {
       selected: isSelected,
       onSelected: (_) => onTap(),
       backgroundColor: AppColors.backgroundPaper,
-      selectedColor: chipColor.withOpacity(0.2),
+      selectedColor: chipColor.withAlpha(51),
       checkmarkColor: chipColor,
       labelStyle: AppTypography.labelSmall.copyWith(
         color: isSelected ? chipColor : AppColors.textSecondary,

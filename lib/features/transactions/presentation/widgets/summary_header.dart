@@ -106,7 +106,7 @@ class _SummaryItem extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(AppSpacing.xs),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withAlpha(25),
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: color, size: 16),

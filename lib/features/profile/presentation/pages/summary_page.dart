@@ -8,8 +8,8 @@ import '../../../../shared/widgets/loading_shimmer.dart';
 import '../../../../shared/widgets/error_state.dart';
 import '../../../transactions/presentation/bloc/transaction_bloc.dart';
 import '../../../transactions/presentation/bloc/transaction_event.dart';
+import '../../../transactions/domain/entities/transaction.dart';
 import '../../../transactions/presentation/bloc/transaction_state.dart';
-import '../../../transactions/presentation/widgets/summary_header.dart';
 
 class SummaryPage extends StatefulWidget {
   const SummaryPage({super.key});
@@ -98,7 +98,7 @@ class _SummaryPageState extends State<SummaryPage> {
     return const SizedBox.shrink();
   }
 
-  Map<String, double> _calculateTotals(List<dynamic> transactions) {
+  Map<String, double> _calculateTotals(List<Transaction> transactions) {
     double income = 0;
     double expense = 0;
 
@@ -232,9 +232,9 @@ class _KpiCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withAlpha(25),
         borderRadius: BorderRadius.circular(AppSpacing.radiusLarge),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withAlpha(76)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -263,7 +263,7 @@ class _KpiCard extends StatelessWidget {
 }
 
 class _CategoryBreakdown extends StatelessWidget {
-  final List<dynamic> transactions;
+  final List<Transaction> transactions;
   final String currency;
 
   const _CategoryBreakdown({

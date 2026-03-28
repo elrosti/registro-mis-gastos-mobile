@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../core/constants/api_constants.dart';
@@ -61,7 +63,7 @@ class ApiClient {
       LogInterceptor(
         requestBody: true,
         responseBody: true,
-        logPrint: (obj) => print('API: $obj'),
+        logPrint: (obj) => developer.log('$obj', name: 'API'),
       ),
     ]);
   }

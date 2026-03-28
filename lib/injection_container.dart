@@ -67,6 +67,7 @@ Future<void> initDependencies() async {
       checkAuthStatusUseCase: sl(),
       getCurrentUserUseCase: sl(),
       loginWithGoogleUseCase: sl(),
+      googleSignIn: sl(),
     ),
   );
 
