@@ -92,6 +92,7 @@ Future<void> initDependencies() async {
   // Transactions - Use Cases
   sl.registerLazySingleton(() => GetTransactions(sl()));
   sl.registerLazySingleton(() => GetTransactionById(sl()));
+  sl.registerLazySingleton(() => GetMonthlySummary(sl()));
   sl.registerLazySingleton(() => CreateTransaction(sl()));
   sl.registerLazySingleton(() => UpdateTransaction(sl()));
   sl.registerLazySingleton(() => DeleteTransaction(sl()));
@@ -102,6 +103,7 @@ Future<void> initDependencies() async {
   sl.registerFactory<TransactionBloc>(
     () => TransactionBloc(
       getTransactionsUseCase: sl(),
+      getMonthlySummaryUseCase: sl(),
       createTransactionUseCase: sl(),
       updateTransactionUseCase: sl(),
       deleteTransactionUseCase: sl(),

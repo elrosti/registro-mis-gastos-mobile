@@ -1,7 +1,9 @@
+import 'dart:developer' as developer;
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/network/api_client.dart';
 import '../models/transaction_model.dart';
+import '../models/monthly_summary_model.dart';
 
 abstract class TransactionRemoteDataSource {
   Future<List<TransactionModel>> getTransactions({
@@ -12,6 +14,8 @@ abstract class TransactionRemoteDataSource {
     String? categoryId,
     String? type,
   });
+
+  Future<MonthlySummary> getMonthlySummary({int? year, int? month});
 
   Future<TransactionModel> getTransactionById(String id);
 
@@ -100,8 +104,45 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
           .toList();
     } on ServerException {
       rethrow;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      developer.log(
+          'Exception in getTransactions: type=${e.runtimeType}, message=$e, stack=$stackTrace',
+          name: 'TransactionRemoteDataSource');
       throw ServerException(message: 'Failed to fetch transactions: $e');
+    }
+  }
+
+  @override
+  Future<MonthlySummary> getMonthlySummary({int? year, int? month}) async {
+    try {
+      final queryParams = <String, dynamic>{};
+      if (year != null) queryParams['year'] = year;
+      if (month != null) queryParams['month'] = month;
+
+      final response = await _apiClient.get(
+        ApiConstants.reportsMonthly,
+        queryParameters: queryParams,
+      );
+
+      developer.log('getMonthlySummary response.data: ${response.data}',
+          name: 'TransactionRemoteDataSource');
+      developer.log(
+          'getMonthlySummary response.data type: ${response.data.runtimeType}',
+          name: 'TransactionRemoteDataSource');
+
+      final data = response.data as Map<String, dynamic>;
+      developer.log(
+          'totalIncome: ${data['totalIncome']}, totalExpenses: ${data['totalExpenses']}, balance: ${data['balance']}',
+          name: 'TransactionRemoteDataSource');
+
+      return MonthlySummary.fromJson(data);
+    } on ServerException {
+      rethrow;
+    } catch (e, stackTrace) {
+      developer.log(
+          'Exception in getMonthlySummary: type=${e.runtimeType}, message=$e, stack=$stackTrace',
+          name: 'TransactionRemoteDataSource');
+      throw ServerException(message: 'Failed to fetch monthly summary: $e');
     }
   }
 

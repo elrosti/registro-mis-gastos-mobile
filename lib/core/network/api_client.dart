@@ -1,9 +1,24 @@
+import 'dart:async';
 import 'dart:developer' as developer;
 
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../core/constants/api_constants.dart';
 import '../../core/errors/exceptions.dart';
+
+class AuthEvents {
+  static final _expiredController = StreamController<void>.broadcast();
+
+  static Stream<void> get onTokenExpired => _expiredController.stream;
+
+  static void emitTokenExpired() {
+    _expiredController.add(null);
+  }
+
+  static void dispose() {
+    _expiredController.close();
+  }
+}
 
 class AuthInterceptor extends Interceptor {
   final FlutterSecureStorage _secureStorage;
@@ -28,10 +43,20 @@ class AuthInterceptor extends Interceptor {
   }
 
   @override
-  void onError(DioException err, ErrorInterceptorHandler handler) {
-    if (err.response?.statusCode == 401) {
-      _secureStorage.delete(key: 'auth_token');
+  void onError(DioException err, ErrorInterceptorHandler handler) async {
+    final statusCode = err.response?.statusCode;
+
+    developer.log('onError: statusCode=$statusCode, type=${err.type}',
+        name: 'AuthInterceptor');
+
+    if (statusCode == 401 || statusCode == 403) {
+      developer.log(
+          '401/403 detected, clearing token and emitting expired event',
+          name: 'AuthInterceptor');
+      await _secureStorage.delete(key: 'auth_token');
+      AuthEvents.emitTokenExpired();
     }
+
     return handler.next(err);
   }
 
@@ -141,6 +166,10 @@ class ApiClient {
   }
 
   Exception _handleError(DioException e) {
+    developer.log(
+        '_handleError: type=${e.type}, statusCode=${e.response?.statusCode}, data=${e.response?.data}',
+        name: 'ApiClient');
+
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
@@ -151,12 +180,27 @@ class ApiClient {
       case DioExceptionType.badResponse:
         final statusCode = e.response?.statusCode;
         final data = e.response?.data;
+        developer.log(
+            'badResponse: statusCode=$statusCode, data type=${data.runtimeType}',
+            name: 'ApiClient');
+
         String message = 'Server error';
-        if (data is Map && data.containsKey('message')) {
-          message = data['message'];
+        if (data is Map) {
+          message = (data['message'] ??
+                  data['error'] ??
+                  data['title'] ??
+                  'Server error')
+              .toString();
+          developer.log('Extracted message: $message', name: 'ApiClient');
+        } else if (data is String && data.isNotEmpty) {
+          message = data;
         }
+
         if (statusCode == 401) {
           return AuthException(message: message);
+        }
+        if (statusCode == 403) {
+          return AuthException(message: 'Acceso denegado: $message');
         }
         return ServerException(message: message, statusCode: statusCode);
       default:

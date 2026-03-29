@@ -29,6 +29,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    context.read<TransactionBloc>().add(const MonthlySummaryFetchRequested());
   }
 
   @override
@@ -120,31 +121,36 @@ class _HomePageState extends State<HomePage> {
     List<Transaction> transactions = [];
     TransactionFilters? filters;
     bool hasMore = false;
+    double totalIncome = 0;
+    double totalExpense = 0;
 
     if (state is TransactionLoaded) {
       transactions = state.transactions;
       filters = state.filters;
       hasMore = state.hasMore;
+      totalIncome = state.totalIncome;
+      totalExpense = state.totalExpense;
     } else if (state is TransactionLoadingMore) {
       transactions = state.transactions;
       filters = state.filters;
     }
-
-    final totals = _calculateTotals(transactions);
 
     return RefreshIndicator(
       onRefresh: () async {
         context
             .read<TransactionBloc>()
             .add(const TransactionFetchRequested(refresh: true));
+        context
+            .read<TransactionBloc>()
+            .add(const MonthlySummaryFetchRequested());
       },
       child: CustomScrollView(
         controller: _scrollController,
         slivers: [
           SliverToBoxAdapter(
             child: SummaryHeader(
-              totalIncome: totals['income'] ?? 0,
-              totalExpense: totals['expense'] ?? 0,
+              totalIncome: totalIncome,
+              totalExpense: totalExpense,
               currency: 'UYU',
             ),
           ),
@@ -201,21 +207,6 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
     );
-  }
-
-  Map<String, double> _calculateTotals(List<Transaction> transactions) {
-    double income = 0;
-    double expense = 0;
-
-    for (final t in transactions) {
-      if (t.isIncome) {
-        income += t.amount;
-      } else {
-        expense += t.amount;
-      }
-    }
-
-    return {'income': income, 'expense': expense};
   }
 
   void _showFilterBottomSheet(BuildContext context) {

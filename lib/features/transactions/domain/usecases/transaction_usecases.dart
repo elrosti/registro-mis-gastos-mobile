@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
+import '../../data/models/monthly_summary_model.dart';
 import '../entities/transaction.dart';
 import '../repositories/transaction_repository.dart';
 
@@ -122,5 +123,15 @@ class GetMostUsedCategories {
 
   Future<Either<Failure, List<Category>>> call() {
     return repository.getMostUsedCategories();
+  }
+}
+
+class GetMonthlySummary {
+  final TransactionRepository repository;
+
+  GetMonthlySummary(this.repository);
+
+  Future<Either<Failure, MonthlySummary>> call({int? year, int? month}) {
+    return repository.getMonthlySummary(year: year, month: month);
   }
 }

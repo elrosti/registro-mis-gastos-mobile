@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
+import '../../data/models/monthly_summary_model.dart';
 import '../../domain/entities/transaction.dart';
 import '../../domain/repositories/transaction_repository.dart';
 import '../datasources/transaction_remote_datasource.dart';
@@ -43,6 +44,20 @@ class TransactionRepositoryImpl implements TransactionRepository {
   Future<Either<Failure, Transaction>> getTransactionById(String id) async {
     try {
       final result = await remoteDataSource.getTransactionById(id);
+      return Right(result);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(UnknownFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, MonthlySummary>> getMonthlySummary(
+      {int? year, int? month}) async {
+    try {
+      final result =
+          await remoteDataSource.getMonthlySummary(year: year, month: month);
       return Right(result);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../data/models/monthly_summary_model.dart';
 import '../../domain/entities/transaction.dart';
 
 abstract class TransactionState extends Equatable {
@@ -34,12 +35,16 @@ class TransactionLoaded extends TransactionState {
   final TransactionFilters filters;
   final bool hasMore;
   final int currentPage;
+  final double totalIncome;
+  final double totalExpense;
 
   const TransactionLoaded({
     required this.transactions,
     required this.filters,
     this.hasMore = true,
     this.currentPage = 0,
+    this.totalIncome = 0,
+    this.totalExpense = 0,
   });
 
   TransactionLoaded copyWith({
@@ -47,17 +52,22 @@ class TransactionLoaded extends TransactionState {
     TransactionFilters? filters,
     bool? hasMore,
     int? currentPage,
+    double? totalIncome,
+    double? totalExpense,
   }) {
     return TransactionLoaded(
       transactions: transactions ?? this.transactions,
       filters: filters ?? this.filters,
       hasMore: hasMore ?? this.hasMore,
       currentPage: currentPage ?? this.currentPage,
+      totalIncome: totalIncome ?? this.totalIncome,
+      totalExpense: totalExpense ?? this.totalExpense,
     );
   }
 
   @override
-  List<Object?> get props => [transactions, filters, hasMore, currentPage];
+  List<Object?> get props =>
+      [transactions, filters, hasMore, currentPage, totalIncome, totalExpense];
 }
 
 class TransactionError extends TransactionState {
@@ -100,7 +110,10 @@ class TransactionFilters extends Equatable {
   });
 
   bool get hasFilters =>
-      type != null || startDate != null || endDate != null || categoryId != null;
+      type != null ||
+      startDate != null ||
+      endDate != null ||
+      categoryId != null;
 
   TransactionFilters copyWith({
     String? type,
@@ -127,4 +140,13 @@ class TransactionFilters extends Equatable {
 
   @override
   List<Object?> get props => [type, startDate, endDate, categoryId];
+}
+
+class MonthlySummaryLoaded extends TransactionState {
+  final MonthlySummary summary;
+
+  const MonthlySummaryLoaded({required this.summary});
+
+  @override
+  List<Object?> get props => [summary];
 }

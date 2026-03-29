@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import '../../../../core/network/api_client.dart';
 import '../../domain/usecases/auth_usecases.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
@@ -12,6 +14,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final GetCurrentUser getCurrentUserUseCase;
   final LoginWithGoogle loginWithGoogleUseCase;
   final GoogleSignIn _googleSignIn;
+
+  StreamSubscription<void>? _tokenExpiredSubscription;
 
   AuthBloc({
     required this.loginUseCase,
@@ -32,6 +36,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthRegisterRequested>(_onRegisterRequested);
     on<AuthGoogleSignInRequested>(_onGoogleSignInRequested);
     on<AuthLogoutRequested>(_onLogoutRequested);
+
+    _tokenExpiredSubscription = AuthEvents.onTokenExpired.listen((_) {
+      add(const AuthLogoutRequested());
+    });
+  }
+
+  @override
+  Future<void> close() {
+    _tokenExpiredSubscription?.cancel();
+    return super.close();
   }
 
   Future<void> _onAuthCheckRequested(

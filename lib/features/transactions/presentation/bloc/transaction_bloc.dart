@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/usecases/transaction_usecases.dart';
 import 'transaction_event.dart';
@@ -5,14 +6,19 @@ import 'transaction_state.dart';
 
 class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   final GetTransactions getTransactionsUseCase;
+  final GetMonthlySummary getMonthlySummaryUseCase;
   final CreateTransaction createTransactionUseCase;
   final UpdateTransaction updateTransactionUseCase;
   final DeleteTransaction deleteTransactionUseCase;
 
   static const int _pageSize = 20;
 
+  double _monthlyIncome = 0;
+  double _monthlyExpense = 0;
+
   TransactionBloc({
     required this.getTransactionsUseCase,
+    required this.getMonthlySummaryUseCase,
     required this.createTransactionUseCase,
     required this.updateTransactionUseCase,
     required this.deleteTransactionUseCase,
@@ -24,6 +30,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     on<TransactionDeleteRequested>(_onDeleteRequested);
     on<TransactionFilterChanged>(_onFilterChanged);
     on<TransactionFilterCleared>(_onFilterCleared);
+    on<MonthlySummaryFetchRequested>(_onMonthlySummaryFetchRequested);
   }
 
   Future<void> _onFetchRequested(
@@ -31,7 +38,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     Emitter<TransactionState> emit,
   ) async {
     final currentFilters = _getCurrentFilters();
-    
+
     if (event.refresh) {
       emit(TransactionLoading());
     } else if (state is TransactionInitial) {
@@ -48,15 +55,22 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     );
 
     result.fold(
-      (failure) => emit(TransactionError(
-        message: failure.message,
-        filters: currentFilters,
-      )),
+      (failure) {
+        developer.log('TransactionFetchRequested error: ${failure.message}',
+            name: 'TransactionBloc');
+        emit(TransactionError(
+          message:
+              failure.message.isEmpty ? 'Error desconhecido' : failure.message,
+          filters: currentFilters,
+        ));
+      },
       (transactions) => emit(TransactionLoaded(
         transactions: transactions,
         filters: currentFilters,
         hasMore: transactions.length >= _pageSize,
         currentPage: 0,
+        totalIncome: _monthlyIncome,
+        totalExpense: _monthlyExpense,
       )),
     );
   }
@@ -94,6 +108,8 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         filters: currentState.filters,
         hasMore: newTransactions.length >= _pageSize,
         currentPage: nextPage,
+        totalIncome: _monthlyIncome,
+        totalExpense: _monthlyExpense,
       )),
     );
   }
@@ -252,5 +268,51 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       return currentState.filters ?? const TransactionFilters();
     }
     return const TransactionFilters();
+  }
+
+  Future<void> _onMonthlySummaryFetchRequested(
+    MonthlySummaryFetchRequested event,
+    Emitter<TransactionState> emit,
+  ) async {
+    final result = await getMonthlySummaryUseCase(
+      year: event.year,
+      month: event.month,
+    );
+
+    result.fold(
+      (failure) {
+        developer.log('MonthlySummaryFetchRequested error: ${failure.message}',
+            name: 'TransactionBloc');
+      },
+      (summary) {
+        developer.log(
+            'MonthlySummaryFetchRequested success: income=${summary.totalIncome}, expense=${summary.totalExpenses}',
+            name: 'TransactionBloc');
+        _monthlyIncome = summary.totalIncome;
+        _monthlyExpense = summary.totalExpenses;
+
+        final currentState = state;
+        if (currentState is TransactionLoaded) {
+          emit(TransactionLoaded(
+            transactions: currentState.transactions,
+            filters: currentState.filters,
+            hasMore: currentState.hasMore,
+            currentPage: currentState.currentPage,
+            totalIncome: _monthlyIncome,
+            totalExpense: _monthlyExpense,
+          ));
+        } else if (currentState is TransactionInitial ||
+            currentState is TransactionLoading) {
+          emit(TransactionLoaded(
+            transactions: const [],
+            filters: const TransactionFilters(),
+            hasMore: false,
+            currentPage: 0,
+            totalIncome: _monthlyIncome,
+            totalExpense: _monthlyExpense,
+          ));
+        }
+      },
+    );
   }
 }

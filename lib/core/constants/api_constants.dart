@@ -23,6 +23,7 @@ class ApiConstants {
 
   // Report endpoints
   static const String reportsMonthly = '/reports/monthly';
+  static const String reportsMonthlyEnhanced = '/reports/monthly/enhanced';
 
   // Timeouts
   static const Duration connectTimeout = Duration(seconds: 30);

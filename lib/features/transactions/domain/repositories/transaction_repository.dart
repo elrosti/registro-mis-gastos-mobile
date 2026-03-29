@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
+import '../../data/models/monthly_summary_model.dart';
 import '../entities/transaction.dart';
 
 abstract class TransactionRepository {
@@ -11,6 +12,9 @@ abstract class TransactionRepository {
     String? categoryId,
     String? type,
   });
+
+  Future<Either<Failure, MonthlySummary>> getMonthlySummary(
+      {int? year, int? month});
 
   Future<Either<Failure, Transaction>> getTransactionById(String id);
 

@@ -120,3 +120,13 @@ class TransactionFilterChanged extends TransactionEvent {
 class TransactionFilterCleared extends TransactionEvent {
   const TransactionFilterCleared();
 }
+
+class MonthlySummaryFetchRequested extends TransactionEvent {
+  final int? year;
+  final int? month;
+
+  const MonthlySummaryFetchRequested({this.year, this.month});
+
+  @override
+  List<Object?> get props => [year, month];
+}
