@@ -261,6 +261,31 @@ class _HomePageState extends State<HomePage> {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.calendar_month),
+              title: const Text('Rango de fechas'),
+              onTap: () async {
+                Navigator.pop(context);
+                final bloc = context.read<TransactionBloc>();
+                final range = await showDateRangePicker(
+                  context: context,
+                  firstDate: DateTime(2020),
+                  lastDate: DateTime.now(),
+                  initialDateRange: DateTimeRange(
+                    start: DateTime.now().subtract(const Duration(days: 30)),
+                    end: DateTime.now(),
+                  ),
+                );
+                if (range != null) {
+                  bloc.add(
+                    TransactionFilterChanged(
+                      startDate: range.start,
+                      endDate: range.end,
+                    ),
+                  );
+                }
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.clear),
               title: const Text('Limpiar filtros'),
               onTap: () {
