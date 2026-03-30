@@ -18,8 +18,39 @@ class CategorySelector extends StatelessWidget {
     this.errorText,
   });
 
+  Category? get _selectedCategory {
+    if (selectedCategoryId == null) return null;
+    try {
+      return categories.firstWhere((c) => c.id == selectedCategoryId);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  void _showCategoryPicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.backgroundPaper,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusLarge),
+        ),
+      ),
+      builder: (context) => _CategoryPickerSheet(
+        categories: categories,
+        selectedCategoryId: selectedCategoryId,
+        onCategorySelected: (category) {
+          onCategorySelected(category);
+          Navigator.pop(context);
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final selectedCategory = _selectedCategory;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -30,25 +61,42 @@ class CategorySelector extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            childAspectRatio: 1,
-            crossAxisSpacing: AppSpacing.sm,
-            mainAxisSpacing: AppSpacing.sm,
+        InkWell(
+          onTap: () => _showCategoryPicker(context),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.md,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.backgroundPaper,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+              border: Border.all(
+                color: errorText != null
+                    ? AppColors.errorMain
+                    : AppColors.borderMain,
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    selectedCategory?.name ?? 'Seleccionar categoría',
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: selectedCategory == null
+                          ? AppColors.textSecondary
+                          : null,
+                    ),
+                  ),
+                ),
+                const Icon(
+                  Icons.keyboard_arrow_down,
+                  color: AppColors.textSecondary,
+                ),
+              ],
+            ),
           ),
-          itemCount: categories.length,
-          itemBuilder: (context, index) {
-            final category = categories[index];
-            final isSelected = category.id == selectedCategoryId;
-            return _CategoryCard(
-              category: category,
-              isSelected: isSelected,
-              onTap: () => onCategorySelected(category),
-            );
-          },
         ),
         if (errorText != null) ...[
           const SizedBox(height: AppSpacing.xs),
@@ -64,91 +112,69 @@ class CategorySelector extends StatelessWidget {
   }
 }
 
-class _CategoryCard extends StatelessWidget {
-  final Category category;
-  final bool isSelected;
-  final VoidCallback onTap;
+class _CategoryPickerSheet extends StatelessWidget {
+  final List<Category> categories;
+  final String? selectedCategoryId;
+  final ValueChanged<Category> onCategorySelected;
 
-  const _CategoryCard({
-    required this.category,
-    required this.isSelected,
-    required this.onTap,
+  const _CategoryPickerSheet({
+    required this.categories,
+    this.selectedCategoryId,
+    required this.onCategorySelected,
   });
 
   @override
   Widget build(BuildContext context) {
-    final color = category.color != null
-        ? Color(int.parse(category.color!.replaceFirst('#', '0xFF')))
-        : AppColors.primaryMain;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        decoration: BoxDecoration(
-          color: isSelected ? color.withAlpha(25) : AppColors.backgroundPaper,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
-          border: Border.all(
-            color: isSelected ? color : AppColors.borderMain,
-            width: isSelected ? 2 : 1,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(height: AppSpacing.sm),
+        Container(
+          width: 40,
+          height: 4,
+          decoration: BoxDecoration(
+            color: AppColors.borderMain,
+            borderRadius: BorderRadius.circular(2),
           ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: color.withAlpha(51),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                _getIconData(category.icon),
-                color: color,
-                size: 20,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              category.name,
-              style: AppTypography.labelSmall.copyWith(
-                color: isSelected ? color : AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+        const SizedBox(height: AppSpacing.md),
+        Text(
+          'Seleccionar Categoría',
+          style: AppTypography.titleMedium,
         ),
-      ),
-    );
-  }
+        const SizedBox(height: AppSpacing.md),
+        Flexible(
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: categories.length,
+            itemBuilder: (context, index) {
+              final category = categories[index];
+              final isSelected = category.id == selectedCategoryId;
+              final color = category.color != null
+                  ? Color(int.parse(category.color!.replaceFirst('#', '0xFF')))
+                  : AppColors.primaryMain;
 
-  IconData _getIconData(String? iconName) {
-    switch (iconName) {
-      case 'restaurant':
-        return Icons.restaurant;
-      case 'shopping_cart':
-        return Icons.shopping_cart;
-      case 'directions_car':
-        return Icons.directions_car;
-      case 'home':
-        return Icons.home;
-      case 'local_hospital':
-        return Icons.local_hospital;
-      case 'school':
-        return Icons.school;
-      case 'entertainment':
-        return Icons.movie;
-      case 'flight':
-        return Icons.flight;
-      case 'fitness':
-        return Icons.fitness_center;
-      case 'pets':
-        return Icons.pets;
-      default:
-        return Icons.category;
-    }
+              return ListTile(
+                title: Text(
+                  category.name,
+                  style: AppTypography.bodyMedium.copyWith(
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.normal,
+                  ),
+                ),
+                trailing: isSelected
+                    ? Icon(
+                        Icons.check,
+                        color: color,
+                      )
+                    : null,
+                onTap: () => onCategorySelected(category),
+              );
+            },
+          ),
+        ),
+        SizedBox(height: MediaQuery.of(context).padding.bottom + AppSpacing.md),
+      ],
+    );
   }
 }
