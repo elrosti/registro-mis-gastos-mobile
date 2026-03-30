@@ -37,11 +37,16 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     TransactionFetchRequested event,
     Emitter<TransactionState> emit,
   ) async {
+    developer.log('_onFetchRequested called, refresh=${event.refresh}',
+        name: 'TransactionBloc');
+
     final currentFilters = _getCurrentFilters();
 
+    final currentState = state;
     if (event.refresh) {
-      emit(TransactionLoading());
-    } else if (state is TransactionInitial) {
+      emit(const TransactionLoading());
+    } else if (currentState is TransactionInitial ||
+        currentState is TransactionOperationSuccess) {
       emit(const TransactionLoading());
     }
 
@@ -64,14 +69,19 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
           filters: currentFilters,
         ));
       },
-      (transactions) => emit(TransactionLoaded(
-        transactions: transactions,
-        filters: currentFilters,
-        hasMore: transactions.length >= _pageSize,
-        currentPage: 0,
-        totalIncome: _monthlyIncome,
-        totalExpense: _monthlyExpense,
-      )),
+      (transactions) {
+        developer.log(
+            'TransactionFetchRequested success: ${transactions.length} transactions',
+            name: 'TransactionBloc');
+        emit(TransactionLoaded(
+          transactions: transactions,
+          filters: currentFilters,
+          hasMore: transactions.length >= _pageSize,
+          currentPage: 0,
+          totalIncome: _monthlyIncome,
+          totalExpense: _monthlyExpense,
+        ));
+      },
     );
   }
 
@@ -139,7 +149,6 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
           message: 'Transacción creada',
           transaction: transaction,
         ));
-        add(const TransactionFetchRequested(refresh: true));
       },
     );
   }
@@ -170,7 +179,6 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
           message: 'Transacción actualizada',
           transaction: transaction,
         ));
-        add(const TransactionFetchRequested(refresh: true));
       },
     );
   }
@@ -190,7 +198,6 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         emit(const TransactionOperationSuccess(
           message: 'Transacción eliminada',
         ));
-        add(const TransactionFetchRequested(refresh: true));
       },
     );
   }
@@ -298,16 +305,6 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
             filters: currentState.filters,
             hasMore: currentState.hasMore,
             currentPage: currentState.currentPage,
-            totalIncome: _monthlyIncome,
-            totalExpense: _monthlyExpense,
-          ));
-        } else if (currentState is TransactionInitial ||
-            currentState is TransactionLoading) {
-          emit(TransactionLoaded(
-            transactions: const [],
-            filters: const TransactionFilters(),
-            hasMore: false,
-            currentPage: 0,
             totalIncome: _monthlyIncome,
             totalExpense: _monthlyExpense,
           ));

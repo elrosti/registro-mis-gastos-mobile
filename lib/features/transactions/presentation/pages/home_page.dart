@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -65,13 +67,30 @@ class _HomePageState extends State<HomePage> {
       ),
       body: BlocConsumer<TransactionBloc, TransactionState>(
         listener: (context, state) {
+          developer.log('HomePage listener state: ${state.runtimeType}',
+              name: 'HomePage');
+
           if (state is TransactionOperationSuccess) {
+            developer.log('HomePage: TransactionOperationSuccess received',
+                name: 'HomePage');
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
                 backgroundColor: AppColors.successMain,
               ),
             );
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                developer.log('HomePage: triggering refresh after success',
+                    name: 'HomePage');
+                context
+                    .read<TransactionBloc>()
+                    .add(const TransactionFetchRequested(refresh: true));
+                context
+                    .read<TransactionBloc>()
+                    .add(const MonthlySummaryFetchRequested());
+              }
+            });
           } else if (state is TransactionError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -81,12 +100,25 @@ class _HomePageState extends State<HomePage> {
             );
           }
         },
+        listenWhen: (previous, current) {
+          final shouldListen = current is TransactionOperationSuccess ||
+              current is TransactionError;
+          developer.log(
+              'HomePage listenWhen: $shouldListen (prev=${previous.runtimeType}, curr=${current.runtimeType})',
+              name: 'HomePage');
+          return shouldListen;
+        },
         builder: (context, state) {
+          developer.log('HomePage builder state: ${state.runtimeType}',
+              name: 'HomePage');
+
           if (state is TransactionLoading) {
+            developer.log('HomePage: showing _buildLoading', name: 'HomePage');
             return _buildLoading();
           }
 
           if (state is TransactionError && state is! TransactionLoaded) {
+            developer.log('HomePage: showing ErrorState', name: 'HomePage');
             return ErrorState(
               message: state.message,
               onRetry: () => context
@@ -95,10 +127,22 @@ class _HomePageState extends State<HomePage> {
             );
           }
 
+          developer.log(
+              'HomePage: checking TransactionLoaded, state is ${state.runtimeType}',
+              name: 'HomePage');
           if (state is TransactionLoaded || state is TransactionLoadingMore) {
+            developer.log(
+                'HomePage: state is TransactionLoaded, going to _buildContent',
+                name: 'HomePage');
             return _buildContent(state);
           }
 
+          if (state is TransactionOperationSuccess) {
+            return _buildLoading();
+          }
+
+          developer.log('HomePage: no matching state, showing EmptyState',
+              name: 'HomePage');
           return const EmptyState(
             icon: Icons.receipt_long,
             title: 'No hay transacciones',
@@ -109,15 +153,31 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildLoading() {
+  Widget _buildLoading([List<Transaction> existingTransactions = const []]) {
+    developer.log(
+        '_buildLoading called with ${existingTransactions.length} transactions',
+        name: 'HomePage');
     return ListView.builder(
       padding: const EdgeInsets.all(AppSpacing.md),
-      itemCount: 5,
-      itemBuilder: (context, index) => const TransactionShimmer(),
+      itemCount:
+          existingTransactions.isNotEmpty ? existingTransactions.length : 5,
+      itemBuilder: (context, index) {
+        if (existingTransactions.isNotEmpty) {
+          return TransactionListItem(
+            transaction: existingTransactions[index],
+            onTap: () {},
+            onEdit: () {},
+            onDelete: () {},
+          );
+        }
+        return const TransactionShimmer();
+      },
     );
   }
 
   Widget _buildContent(TransactionState state) {
+    developer.log('_buildContent called', name: 'HomePage');
+
     List<Transaction> transactions = [];
     TransactionFilters? filters;
     bool hasMore = false;
@@ -130,82 +190,40 @@ class _HomePageState extends State<HomePage> {
       hasMore = state.hasMore;
       totalIncome = state.totalIncome;
       totalExpense = state.totalExpense;
+      developer.log(
+          '_buildContent: loaded ${transactions.length} transactions, income=$totalIncome, expense=$totalExpense',
+          name: 'HomePage');
     } else if (state is TransactionLoadingMore) {
       transactions = state.transactions;
       filters = state.filters;
     }
 
-    return RefreshIndicator(
-      onRefresh: () async {
-        context
-            .read<TransactionBloc>()
-            .add(const TransactionFetchRequested(refresh: true));
-        context
-            .read<TransactionBloc>()
-            .add(const MonthlySummaryFetchRequested());
-      },
-      child: CustomScrollView(
-        controller: _scrollController,
-        slivers: [
-          SliverToBoxAdapter(
-            child: SummaryHeader(
-              totalIncome: totalIncome,
-              totalExpense: totalExpense,
-              currency: 'UYU',
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.md),
-              child: widgets.TransactionFilters(
-                selectedType: filters?.type,
-                onTypeChanged: (type) {
-                  context.read<TransactionBloc>().add(
-                        TransactionFilterChanged(type: type),
-                      );
-                },
-                onClearFilters: () {
-                  context
-                      .read<TransactionBloc>()
-                      .add(const TransactionFilterCleared());
-                },
-              ),
-            ),
-          ),
-          if (transactions.isEmpty)
-            const SliverFillRemaining(
-              child: EmptyState(
-                icon: Icons.receipt_long,
-                title: 'No hay transacciones',
-                subtitle: 'Comienza agregando tu primera transacción',
-              ),
-            )
-          else
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  if (index >= transactions.length) {
-                    return hasMore
-                        ? const Padding(
-                            padding: EdgeInsets.all(AppSpacing.md),
-                            child: Center(child: CircularProgressIndicator()),
-                          )
-                        : const SizedBox.shrink();
-                  }
+    developer.log(
+        '_buildContent: returning widget with ${transactions.length} transactions',
+        name: 'HomePage');
 
-                  final transaction = transactions[index];
-                  return TransactionListItem(
-                    transaction: transaction,
-                    onTap: () => _openTransactionDetail(transaction),
-                    onEdit: () => _editTransaction(transaction),
-                    onDelete: () => _deleteTransaction(transaction),
-                  );
-                },
-                childCount: transactions.length + (hasMore ? 1 : 0),
-              ),
-            ),
-        ],
-      ),
+    return ListView.builder(
+      itemCount: transactions.length + 1,
+      itemBuilder: (context, index) {
+        if (index == 0) {
+          return SummaryHeader(
+            totalIncome: totalIncome,
+            totalExpense: totalExpense,
+            currency: 'UYU',
+          );
+        }
+        final txIndex = index - 1;
+        if (txIndex >= transactions.length) {
+          return const SizedBox.shrink();
+        }
+        final transaction = transactions[txIndex];
+        return TransactionListItem(
+          transaction: transaction,
+          onTap: () {},
+          onEdit: () {},
+          onDelete: () {},
+        );
+      },
     );
   }
 

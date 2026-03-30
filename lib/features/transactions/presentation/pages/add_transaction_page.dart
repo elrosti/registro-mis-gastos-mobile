@@ -4,8 +4,10 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/formatters.dart';
+import '../../../../injection_container.dart';
 import '../../../../shared/widgets/primary_button.dart';
 import '../../../../shared/widgets/text_input_field.dart';
+import '../../data/datasources/category_remote_datasource.dart';
 import '../../domain/entities/transaction.dart';
 import '../bloc/transaction_bloc.dart';
 import '../bloc/transaction_event.dart';
@@ -37,68 +39,16 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   String? _selectedCategoryId;
   bool _isLoading = false;
 
-  bool get isEditing => widget.transaction != null;
+  List<Category> _categories = [];
+  bool _isLoadingCategories = false;
+  String? _categoriesError;
 
-  final List<Category> _mockCategories = [
-    const Category(
-        id: '1',
-        name: 'Comida',
-        type: 'EXPENSE',
-        icon: 'restaurant',
-        color: '#FF6B6B'),
-    const Category(
-        id: '2',
-        name: 'Transporte',
-        type: 'EXPENSE',
-        icon: 'directions_car',
-        color: '#4ECDC4'),
-    const Category(
-        id: '3',
-        name: 'Hogar',
-        type: 'EXPENSE',
-        icon: 'home',
-        color: '#45B7D1'),
-    const Category(
-        id: '4',
-        name: 'Salud',
-        type: 'EXPENSE',
-        icon: 'local_hospital',
-        color: '#96CEB4'),
-    const Category(
-        id: '5',
-        name: 'Entretenimiento',
-        type: 'EXPENSE',
-        icon: 'entertainment',
-        color: '#DDA0DD'),
-    const Category(
-        id: '6',
-        name: 'Compras',
-        type: 'EXPENSE',
-        icon: 'shopping_cart',
-        color: '#98D8C8'),
-    const Category(
-        id: '7',
-        name: 'Salario',
-        type: 'INCOME',
-        icon: 'work',
-        color: '#22C55E'),
-    const Category(
-        id: '8',
-        name: 'Freelance',
-        type: 'INCOME',
-        icon: 'laptop',
-        color: '#3B82F6'),
-    const Category(
-        id: '9',
-        name: 'Inversiones',
-        type: 'INCOME',
-        icon: 'trending_up',
-        color: '#8B5CF6'),
-  ];
+  bool get isEditing => widget.transaction != null;
 
   @override
   void initState() {
     super.initState();
+    _loadCategories();
     if (isEditing) {
       final t = widget.transaction!;
       _nameController.text = t.shortName;
@@ -108,6 +58,31 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
       _currency = t.currency;
       _selectedDate = t.transactionDate;
       _selectedCategoryId = t.categoryId;
+    }
+  }
+
+  Future<void> _loadCategories() async {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoadingCategories = true;
+      _categoriesError = null;
+    });
+
+    try {
+      final dataSource = CategoryRemoteDataSourceImpl(apiClient: sl());
+      final categories = await dataSource.getCategories();
+      if (!mounted) return;
+      setState(() {
+        _categories = categories.where((c) => c.type == _type).toList();
+        _isLoadingCategories = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoadingCategories = false;
+        _categoriesError = 'No se pudieron cargar las categorías';
+      });
     }
   }
 
@@ -157,7 +132,6 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
               categoryId: _selectedCategoryId,
             ),
           );
-      Navigator.of(context).pop(true);
     } else {
       context.read<TransactionBloc>().add(
             TransactionCreateRequested(
@@ -193,6 +167,9 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 backgroundColor: AppColors.errorMain,
               ),
             );
+          } else if (state is TransactionOperationSuccess) {
+            setState(() => _isLoading = false);
+            Navigator.of(context).pop(true);
           }
         },
         child: SingleChildScrollView(
@@ -209,6 +186,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                       _type = type;
                       _selectedCategoryId = null;
                     });
+                    _loadCategories();
                   },
                 ),
                 const SizedBox(height: AppSpacing.lg),
@@ -246,14 +224,23 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                   },
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                CategorySelector(
-                  categories:
-                      _mockCategories.where((c) => c.type == _type).toList(),
-                  selectedCategoryId: _selectedCategoryId,
-                  onCategorySelected: (category) {
-                    setState(() => _selectedCategoryId = category.id);
-                  },
-                ),
+                if (_isLoadingCategories)
+                  const Center(child: CircularProgressIndicator())
+                else if (_categoriesError != null)
+                  Text(
+                    _categoriesError!,
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: AppColors.errorMain,
+                    ),
+                  )
+                else
+                  CategorySelector(
+                    categories: _categories,
+                    selectedCategoryId: _selectedCategoryId,
+                    onCategorySelected: (category) {
+                      setState(() => _selectedCategoryId = category.id);
+                    },
+                  ),
                 const SizedBox(height: AppSpacing.xl),
                 PrimaryButton(
                   text: isEditing ? 'Guardar Cambios' : 'Crear Transacción',

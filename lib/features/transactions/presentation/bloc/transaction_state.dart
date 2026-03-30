@@ -91,9 +91,6 @@ class TransactionOperationSuccess extends TransactionState {
     required this.message,
     this.transaction,
   });
-
-  @override
-  List<Object?> get props => [message, transaction];
 }
 
 class TransactionFilters extends Equatable {
