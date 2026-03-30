@@ -73,6 +73,9 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         developer.log(
             'TransactionFetchRequested success: ${transactions.length} transactions',
             name: 'TransactionBloc');
+        developer.log(
+            'TransactionFetchRequested: about to emit TransactionLoaded with ${transactions.length} transactions',
+            name: 'TransactionBloc');
         emit(TransactionLoaded(
           transactions: transactions,
           filters: currentFilters,
@@ -81,6 +84,9 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
           totalIncome: _monthlyIncome,
           totalExpense: _monthlyExpense,
         ));
+        developer.log(
+            'TransactionFetchRequested: TransactionLoaded emitted, current state is ${state.runtimeType}',
+            name: 'TransactionBloc');
       },
     );
   }
@@ -149,6 +155,8 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
           message: 'Transacción creada',
           transaction: transaction,
         ));
+        add(const TransactionFetchRequested(refresh: true));
+        add(const MonthlySummaryFetchRequested());
       },
     );
   }
@@ -179,6 +187,8 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
           message: 'Transacción actualizada',
           transaction: transaction,
         ));
+        add(const TransactionFetchRequested(refresh: true));
+        add(const MonthlySummaryFetchRequested());
       },
     );
   }
@@ -198,6 +208,8 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         emit(const TransactionOperationSuccess(
           message: 'Transacción eliminada',
         ));
+        add(const TransactionFetchRequested(refresh: true));
+        add(const MonthlySummaryFetchRequested());
       },
     );
   }

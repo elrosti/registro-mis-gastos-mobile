@@ -1,24 +1,10 @@
-import 'dart:async';
 import 'dart:developer' as developer;
 
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../core/constants/api_constants.dart';
 import '../../core/errors/exceptions.dart';
-
-class AuthEvents {
-  static final _expiredController = StreamController<void>.broadcast();
-
-  static Stream<void> get onTokenExpired => _expiredController.stream;
-
-  static void emitTokenExpired() {
-    _expiredController.add(null);
-  }
-
-  static void dispose() {
-    _expiredController.close();
-  }
-}
+import '../../core/services/auth_service.dart';
 
 class AuthInterceptor extends Interceptor {
   final FlutterSecureStorage _secureStorage;
@@ -51,10 +37,10 @@ class AuthInterceptor extends Interceptor {
 
     if (statusCode == 401 || statusCode == 403) {
       developer.log(
-          '401/403 detected, clearing token and emitting expired event',
+          '401/403 detected, clearing token and notifying auth service',
           name: 'AuthInterceptor');
       await _secureStorage.delete(key: 'auth_token');
-      AuthEvents.emitTokenExpired();
+      authService.notifyTokenExpired();
     }
 
     return handler.next(err);

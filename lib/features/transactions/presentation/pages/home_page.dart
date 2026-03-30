@@ -79,18 +79,6 @@ class _HomePageState extends State<HomePage> {
                 backgroundColor: AppColors.successMain,
               ),
             );
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) {
-                developer.log('HomePage: triggering refresh after success',
-                    name: 'HomePage');
-                context
-                    .read<TransactionBloc>()
-                    .add(const TransactionFetchRequested(refresh: true));
-                context
-                    .read<TransactionBloc>()
-                    .add(const MonthlySummaryFetchRequested());
-              }
-            });
           } else if (state is TransactionError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -219,9 +207,9 @@ class _HomePageState extends State<HomePage> {
         final transaction = transactions[txIndex];
         return TransactionListItem(
           transaction: transaction,
-          onTap: () {},
-          onEdit: () {},
-          onDelete: () {},
+          onTap: () => _openTransactionDetail(transaction),
+          onEdit: () => _editTransaction(transaction),
+          onDelete: () => _deleteTransaction(transaction),
         );
       },
     );

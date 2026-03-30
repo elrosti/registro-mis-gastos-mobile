@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'core/services/auth_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
@@ -14,18 +15,39 @@ import 'features/profile/presentation/pages/summary_page.dart';
 import 'features/profile/presentation/pages/profile_page.dart';
 import 'injection_container.dart';
 
-class App extends StatelessWidget {
+class App extends StatefulWidget {
   const App({super.key});
+
+  @override
+  State<App> createState() => _AppState();
+}
+
+class _AppState extends State<App> {
+  late final AuthBloc _authBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _authBloc = sl<AuthBloc>()..add(const AuthCheckRequested());
+    authService.onTokenExpired.listen((_) {
+      _authBloc.add(const AuthLogoutRequested());
+    });
+  }
+
+  @override
+  void dispose() {
+    authService.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<AuthBloc>(
-          create: (_) => sl<AuthBloc>()..add(const AuthCheckRequested()),
-        ),
+        BlocProvider<AuthBloc>.value(value: _authBloc),
         BlocProvider<TransactionBloc>(
-          create: (_) => sl<TransactionBloc>()..add(const TransactionFetchRequested()),
+          create: (_) =>
+              sl<TransactionBloc>()..add(const TransactionFetchRequested()),
         ),
       ],
       child: MaterialApp(
@@ -67,6 +89,17 @@ class MainNavigationPage extends StatefulWidget {
 class _MainNavigationPageState extends State<MainNavigationPage> {
   int _currentIndex = 0;
 
+  void _onAddTransaction() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => BlocProvider.value(
+          value: context.read<TransactionBloc>(),
+          child: const AddTransactionPage(),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,7 +107,6 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
         index: _currentIndex,
         children: const [
           HomePage(),
-          AddTransactionPage(),
           SummaryPage(),
           ProfilePage(),
         ],
@@ -82,6 +114,9 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
+          if (index == 1 && _currentIndex != 1) {
+            // índice 1 era AddTransaction, ahora es SummaryPage
+          }
           setState(() {
             _currentIndex = index;
           });
@@ -91,11 +126,6 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
             icon: Icon(Icons.home_outlined),
             activeIcon: Icon(Icons.home),
             label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle_outline),
-            activeIcon: Icon(Icons.add_circle),
-            label: 'Agregar',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.pie_chart_outline),
@@ -109,6 +139,11 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _onAddTransaction,
+        child: const Icon(Icons.add),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }
