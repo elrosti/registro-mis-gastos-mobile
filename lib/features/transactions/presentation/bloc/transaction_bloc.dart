@@ -31,6 +31,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     on<TransactionFilterChanged>(_onFilterChanged);
     on<TransactionFilterCleared>(_onFilterCleared);
     on<MonthlySummaryFetchRequested>(_onMonthlySummaryFetchRequested);
+    on<MonthChanged>(_onMonthChanged);
   }
 
   Future<void> _onFetchRequested(
@@ -246,6 +247,8 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         filters: newFilters,
         hasMore: transactions.length >= _pageSize,
         currentPage: 0,
+        totalIncome: _monthlyIncome,
+        totalExpense: _monthlyExpense,
       )),
     );
   }
@@ -322,6 +325,55 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
           ));
         }
       },
+    );
+  }
+
+  Future<void> _onMonthChanged(
+    MonthChanged event,
+    Emitter<TransactionState> emit,
+  ) async {
+    emit(const TransactionLoading());
+
+    final summaryResult = await getMonthlySummaryUseCase(
+      year: event.year,
+      month: event.month,
+    );
+
+    summaryResult.fold(
+      (failure) {},
+      (summary) {
+        _monthlyIncome = summary.totalIncome;
+        _monthlyExpense = summary.totalExpenses;
+      },
+    );
+
+    final newFilters = TransactionFilters(
+      startDate: DateTime(event.year, event.month, 1),
+      endDate: DateTime(event.year, event.month + 1, 0),
+    );
+
+    final result = await getTransactionsUseCase(
+      page: 0,
+      size: _pageSize,
+      type: newFilters.type,
+      startDate: newFilters.startDate,
+      endDate: newFilters.endDate,
+      categoryId: newFilters.categoryId,
+    );
+
+    result.fold(
+      (failure) => emit(TransactionError(
+        message: failure.message,
+        filters: newFilters,
+      )),
+      (transactions) => emit(TransactionLoaded(
+        transactions: transactions,
+        filters: newFilters,
+        hasMore: transactions.length >= _pageSize,
+        currentPage: 0,
+        totalIncome: _monthlyIncome,
+        totalExpense: _monthlyExpense,
+      )),
     );
   }
 }

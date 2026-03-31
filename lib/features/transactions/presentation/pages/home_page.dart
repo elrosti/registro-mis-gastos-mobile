@@ -36,20 +36,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _loadMonthData() {
-    context.read<TransactionBloc>().add(MonthlySummaryFetchRequested(
+    context.read<TransactionBloc>().add(MonthChanged(
           year: _selectedMonth.year,
           month: _selectedMonth.month,
         ));
-    _applyMonthFilter();
-  }
-
-  void _applyMonthFilter() {
-    context.read<TransactionBloc>().add(
-          TransactionFilterChanged(
-            startDate: DateTime(_selectedMonth.year, _selectedMonth.month, 1),
-            endDate: DateTime(_selectedMonth.year, _selectedMonth.month + 1, 0),
-          ),
-        );
   }
 
   void _onMonthChanged(DateTime month) {

@@ -130,3 +130,13 @@ class MonthlySummaryFetchRequested extends TransactionEvent {
   @override
   List<Object?> get props => [year, month];
 }
+
+class MonthChanged extends TransactionEvent {
+  final int year;
+  final int month;
+
+  const MonthChanged({required this.year, required this.month});
+
+  @override
+  List<Object?> get props => [year, month];
+}
