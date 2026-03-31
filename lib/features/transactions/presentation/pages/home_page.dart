@@ -171,6 +171,7 @@ class _HomePageState extends State<HomePage> {
     bool hasMore = false;
     double totalIncome = 0;
     double totalExpense = 0;
+    bool isLoadingMore = false;
 
     if (state is TransactionLoaded) {
       transactions = state.transactions;
@@ -184,34 +185,58 @@ class _HomePageState extends State<HomePage> {
     } else if (state is TransactionLoadingMore) {
       transactions = state.transactions;
       filters = state.filters;
+      isLoadingMore = true;
     }
 
     developer.log(
         '_buildContent: returning widget with ${transactions.length} transactions',
         name: 'HomePage');
 
-    return ListView.builder(
-      itemCount: transactions.length + 1,
-      itemBuilder: (context, index) {
-        if (index == 0) {
-          return SummaryHeader(
-            totalIncome: totalIncome,
-            totalExpense: totalExpense,
-            currency: 'UYU',
-          );
-        }
-        final txIndex = index - 1;
-        if (txIndex >= transactions.length) {
-          return const SizedBox.shrink();
-        }
-        final transaction = transactions[txIndex];
-        return TransactionListItem(
-          transaction: transaction,
-          onTap: () => _openTransactionDetail(transaction),
-          onEdit: () => _editTransaction(transaction),
-          onDelete: () => _deleteTransaction(transaction),
-        );
+    final itemCount = transactions.length + 1 + (hasMore ? 1 : 0);
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        context
+            .read<TransactionBloc>()
+            .add(const TransactionFetchRequested(refresh: true));
       },
+      child: CustomScrollView(
+        controller: _scrollController,
+        slivers: [
+          SliverToBoxAdapter(
+            child: SummaryHeader(
+              totalIncome: totalIncome,
+              totalExpense: totalExpense,
+              currency: 'UYU',
+            ),
+          ),
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final txIndex = index;
+                if (txIndex >= transactions.length) {
+                  return Padding(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    child: Center(
+                      child: isLoadingMore
+                          ? const CircularProgressIndicator()
+                          : const SizedBox.shrink(),
+                    ),
+                  );
+                }
+                final transaction = transactions[txIndex];
+                return TransactionListItem(
+                  transaction: transaction,
+                  onTap: () => _openTransactionDetail(transaction),
+                  onEdit: () => _editTransaction(transaction),
+                  onDelete: () => _deleteTransaction(transaction),
+                );
+              },
+              childCount: itemCount - 1,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
