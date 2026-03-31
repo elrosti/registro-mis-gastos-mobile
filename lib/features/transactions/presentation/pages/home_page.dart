@@ -26,12 +26,37 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final ScrollController _scrollController = ScrollController();
+  DateTime _selectedMonth = DateTime.now();
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    context.read<TransactionBloc>().add(const MonthlySummaryFetchRequested());
+    _loadMonthData();
+  }
+
+  void _loadMonthData() {
+    context.read<TransactionBloc>().add(MonthlySummaryFetchRequested(
+          year: _selectedMonth.year,
+          month: _selectedMonth.month,
+        ));
+    _applyMonthFilter();
+  }
+
+  void _applyMonthFilter() {
+    context.read<TransactionBloc>().add(
+          TransactionFilterChanged(
+            startDate: DateTime(_selectedMonth.year, _selectedMonth.month, 1),
+            endDate: DateTime(_selectedMonth.year, _selectedMonth.month + 1, 0),
+          ),
+        );
+  }
+
+  void _onMonthChanged(DateTime month) {
+    setState(() {
+      _selectedMonth = month;
+    });
+    _loadMonthData();
   }
 
   @override
@@ -208,6 +233,8 @@ class _HomePageState extends State<HomePage> {
               totalIncome: totalIncome,
               totalExpense: totalExpense,
               currency: 'UYU',
+              selectedMonth: _selectedMonth,
+              onMonthChanged: _onMonthChanged,
             ),
           ),
           SliverList(
@@ -234,6 +261,9 @@ class _HomePageState extends State<HomePage> {
               },
               childCount: itemCount - 1,
             ),
+          ),
+          const SliverToBoxAdapter(
+            child: SizedBox(height: 80),
           ),
         ],
       ),

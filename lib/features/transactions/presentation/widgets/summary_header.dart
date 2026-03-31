@@ -8,12 +8,16 @@ class SummaryHeader extends StatelessWidget {
   final double totalIncome;
   final double totalExpense;
   final String currency;
+  final DateTime? selectedMonth;
+  final ValueChanged<DateTime>? onMonthChanged;
 
   const SummaryHeader({
     super.key,
     required this.totalIncome,
     required this.totalExpense,
     required this.currency,
+    this.selectedMonth,
+    this.onMonthChanged,
   });
 
   double get balance => totalIncome - totalExpense;
@@ -36,6 +40,39 @@ class SummaryHeader extends StatelessWidget {
       ),
       child: Column(
         children: [
+          if (selectedMonth != null && onMonthChanged != null) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.chevron_left),
+                  onPressed: () {
+                    onMonthChanged!(
+                      DateTime(selectedMonth!.year, selectedMonth!.month - 1),
+                    );
+                  },
+                ),
+                Text(
+                  DateFormatter.formatMonthYear(selectedMonth!),
+                  style: AppTypography.titleMedium,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.chevron_right),
+                  onPressed: () {
+                    final nextMonth = DateTime(
+                      selectedMonth!.year,
+                      selectedMonth!.month + 1,
+                    );
+                    if (nextMonth.isBefore(
+                        DateTime.now().add(const Duration(days: 1)))) {
+                      onMonthChanged!(nextMonth);
+                    }
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+          ],
           Text(
             'Balance del mes',
             style: AppTypography.bodyMedium.copyWith(
