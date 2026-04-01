@@ -7,6 +7,7 @@ import '../../../../shared/widgets/confirmation_dialog.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
+import 'about_page.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -31,8 +32,6 @@ class ProfilePage extends StatelessWidget {
               children: [
                 _ProfileHeader(user: user),
                 const SizedBox(height: AppSpacing.xl),
-                _SettingsSection(),
-                const SizedBox(height: AppSpacing.lg),
                 _AccountSection(context),
               ],
             ),
@@ -84,45 +83,6 @@ class _ProfileHeader extends StatelessWidget {
   }
 }
 
-class _SettingsSection extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.backgroundPaper,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLarge),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Text(
-              'Preferencias',
-              style: AppTypography.labelLarge.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ),
-          _SettingsTile(
-            icon: Icons.attach_money,
-            title: 'Moneda predeterminada',
-            subtitle: 'UYU - Peso Uruguayo',
-            onTap: () {},
-          ),
-          const Divider(height: 1),
-          _SettingsTile(
-            icon: Icons.notifications_outlined,
-            title: 'Notificaciones',
-            subtitle: 'Activar recordatorios',
-            onTap: () {},
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _AccountSection extends StatelessWidget {
   final BuildContext context;
 
@@ -148,22 +108,10 @@ class _AccountSection extends StatelessWidget {
             ),
           ),
           _SettingsTile(
-            icon: Icons.lock_outline,
-            title: 'Cambiar contraseña',
-            onTap: () {},
-          ),
-          const Divider(height: 1),
-          _SettingsTile(
-            icon: Icons.help_outline,
-            title: 'Ayuda y soporte',
-            onTap: () {},
-          ),
-          const Divider(height: 1),
-          _SettingsTile(
             icon: Icons.info_outline,
             title: 'Acerca de',
             subtitle: 'Versión 1.0.0',
-            onTap: () {},
+            onTap: () => _navigateToAbout(context),
           ),
           const Divider(height: 1),
           _SettingsTile(
@@ -189,6 +137,14 @@ class _AccountSection extends StatelessWidget {
     if (confirmed == true && context.mounted) {
       context.read<AuthBloc>().add(const AuthLogoutRequested());
     }
+  }
+
+  void _navigateToAbout(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const AboutPage(),
+      ),
+    );
   }
 }
 

@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../data/datasources/invoice_remote_datasource.dart';
 import '../../domain/usecases/transaction_usecases.dart';
 import 'transaction_event.dart';
 import 'transaction_state.dart';
@@ -10,6 +11,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   final CreateTransaction createTransactionUseCase;
   final UpdateTransaction updateTransactionUseCase;
   final DeleteTransaction deleteTransactionUseCase;
+  final InvoiceRemoteDataSource invoiceRemoteDataSource;
 
   static const int _pageSize = 20;
 
@@ -22,6 +24,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     required this.createTransactionUseCase,
     required this.updateTransactionUseCase,
     required this.deleteTransactionUseCase,
+    required this.invoiceRemoteDataSource,
   }) : super(const TransactionInitial()) {
     on<TransactionFetchRequested>(_onFetchRequested);
     on<TransactionLoadMoreRequested>(_onLoadMoreRequested);
@@ -32,6 +35,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     on<TransactionFilterCleared>(_onFilterCleared);
     on<MonthlySummaryFetchRequested>(_onMonthlySummaryFetchRequested);
     on<MonthChanged>(_onMonthChanged);
+    on<InvoiceImageProcessRequested>(_onInvoiceImageProcessRequested);
   }
 
   Future<void> _onFetchRequested(
@@ -375,5 +379,41 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         totalExpense: _monthlyExpense,
       )),
     );
+  }
+
+  Future<void> _onInvoiceImageProcessRequested(
+    InvoiceImageProcessRequested event,
+    Emitter<TransactionState> emit,
+  ) async {
+    developer.log('_onInvoiceImageProcessRequested called',
+        name: 'TransactionBloc');
+
+    emit(const InvoiceProcessing());
+
+    try {
+      final result = await invoiceRemoteDataSource.processInvoiceImage(
+        filePath: event.filePath,
+        fileName: event.fileName,
+      );
+
+      if (result.success) {
+        emit(InvoiceProcessingSuccess(
+          message: result.message ?? 'Gasto registrado desde imagen',
+          transaction: result.transaction,
+        ));
+        add(const TransactionFetchRequested(refresh: true));
+        add(const MonthlySummaryFetchRequested());
+      } else {
+        emit(InvoiceProcessingError(
+          message: result.error ?? 'Error al procesar la imagen',
+        ));
+      }
+    } catch (e) {
+      developer.log('InvoiceImageProcessRequested error: $e',
+          name: 'TransactionBloc');
+      emit(InvoiceProcessingError(
+        message: 'Error al procesar la imagen: $e',
+      ));
+    }
   }
 }

@@ -140,3 +140,16 @@ class MonthChanged extends TransactionEvent {
   @override
   List<Object?> get props => [year, month];
 }
+
+class InvoiceImageProcessRequested extends TransactionEvent {
+  final String filePath;
+  final String fileName;
+
+  const InvoiceImageProcessRequested({
+    required this.filePath,
+    required this.fileName,
+  });
+
+  @override
+  List<Object?> get props => [filePath, fileName];
+}

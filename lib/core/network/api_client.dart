@@ -151,6 +151,33 @@ class ApiClient {
     }
   }
 
+  Future<Response<T>> uploadFile<T>(
+    String path, {
+    required String filePath,
+    required String fileName,
+    String fieldName = 'file',
+    Map<String, dynamic>? data,
+    void Function(int, int)? onSendProgress,
+  }) async {
+    try {
+      final formData = FormData.fromMap({
+        fieldName: await MultipartFile.fromFile(filePath, filename: fileName),
+        ...?data,
+      });
+
+      return await _dio.post<T>(
+        path,
+        data: formData,
+        options: Options(
+          contentType: 'multipart/form-data',
+        ),
+        onSendProgress: onSendProgress,
+      );
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
   Exception _handleError(DioException e) {
     developer.log(
         '_handleError: type=${e.type}, statusCode=${e.response?.statusCode}, data=${e.response?.data}',

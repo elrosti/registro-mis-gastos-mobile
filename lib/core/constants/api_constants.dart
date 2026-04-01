@@ -25,6 +25,9 @@ class ApiConstants {
   static const String reportsMonthly = '/reports/monthly';
   static const String reportsMonthlyEnhanced = '/reports/monthly/enhanced';
 
+  // Invoice endpoints
+  static const String invoices = '/invoices';
+
   // Timeouts
   static const Duration connectTimeout = Duration(seconds: 30);
   static const Duration receiveTimeout = Duration(seconds: 30);

@@ -11,6 +11,7 @@ import 'features/auth/domain/usecases/auth_usecases.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/transactions/data/datasources/transaction_remote_datasource.dart';
 import 'features/transactions/data/datasources/category_remote_datasource.dart';
+import 'features/transactions/data/datasources/invoice_remote_datasource.dart';
 import 'features/transactions/data/repositories/transaction_repository_impl.dart';
 import 'features/transactions/domain/repositories/transaction_repository.dart';
 import 'features/transactions/domain/usecases/transaction_usecases.dart';
@@ -80,6 +81,10 @@ Future<void> initDependencies() async {
     () => CategoryRemoteDataSourceImpl(apiClient: sl()),
   );
 
+  sl.registerLazySingleton<InvoiceRemoteDataSource>(
+    () => InvoiceRemoteDataSourceImpl(apiClient: sl()),
+  );
+
   // Transactions - Repositories
   sl.registerLazySingleton<TransactionRepository>(
     () => TransactionRepositoryImpl(remoteDataSource: sl()),
@@ -107,6 +112,7 @@ Future<void> initDependencies() async {
       createTransactionUseCase: sl(),
       updateTransactionUseCase: sl(),
       deleteTransactionUseCase: sl(),
+      invoiceRemoteDataSource: sl(),
     ),
   );
 }

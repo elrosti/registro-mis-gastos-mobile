@@ -147,3 +147,29 @@ class MonthlySummaryLoaded extends TransactionState {
   @override
   List<Object?> get props => [summary];
 }
+
+class InvoiceProcessing extends TransactionState {
+  const InvoiceProcessing();
+}
+
+class InvoiceProcessingSuccess extends TransactionState {
+  final String message;
+  final Transaction? transaction;
+
+  const InvoiceProcessingSuccess({
+    required this.message,
+    this.transaction,
+  });
+
+  @override
+  List<Object?> get props => [message, transaction];
+}
+
+class InvoiceProcessingError extends TransactionState {
+  final String message;
+
+  const InvoiceProcessingError({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
