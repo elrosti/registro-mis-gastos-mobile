@@ -388,7 +388,12 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     developer.log('_onInvoiceImageProcessRequested called',
         name: 'TransactionBloc');
 
-    final currentFilters = _getCurrentFilters();
+    final currentFilters = TransactionFilters(
+      type: event.type,
+      startDate: event.startDate,
+      endDate: event.endDate,
+      categoryId: event.categoryId,
+    );
 
     emit(const InvoiceProcessing());
 

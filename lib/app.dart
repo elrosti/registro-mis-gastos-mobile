@@ -157,12 +157,24 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
 
       if (image != null && mounted) {
         setState(() => _isProcessingInvoice = true);
-        context.read<TransactionBloc>().add(
-              InvoiceImageProcessRequested(
-                filePath: image.path,
-                fileName: image.name,
-              ),
-            );
+
+        final bloc = context.read<TransactionBloc>();
+        final state = bloc.state;
+        TransactionFilters? filters;
+        if (state is TransactionLoaded) {
+          filters = state.filters;
+        }
+
+        bloc.add(
+          InvoiceImageProcessRequested(
+            filePath: image.path,
+            fileName: image.name,
+            type: filters?.type,
+            startDate: filters?.startDate,
+            endDate: filters?.endDate,
+            categoryId: filters?.categoryId,
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
