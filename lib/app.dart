@@ -13,6 +13,7 @@ import 'features/transactions/presentation/bloc/transaction_event.dart';
 import 'features/transactions/presentation/bloc/transaction_state.dart';
 import 'features/transactions/presentation/pages/home_page.dart';
 import 'features/transactions/presentation/pages/add_transaction_page.dart';
+import 'features/transactions/presentation/pages/invoice_image_preview_page.dart';
 import 'features/profile/presentation/pages/profile_page.dart';
 import 'injection_container.dart';
 
@@ -156,23 +157,15 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       );
 
       if (image != null && mounted) {
-        setState(() => _isProcessingInvoice = true);
-
-        final bloc = context.read<TransactionBloc>();
-        final state = bloc.state;
-        TransactionFilters? filters;
-        if (state is TransactionLoaded) {
-          filters = state.filters;
-        }
-
-        bloc.add(
-          InvoiceImageProcessRequested(
-            filePath: image.path,
-            fileName: image.name,
-            type: filters?.type,
-            startDate: filters?.startDate,
-            endDate: filters?.endDate,
-            categoryId: filters?.categoryId,
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => BlocProvider.value(
+              value: context.read<TransactionBloc>(),
+              child: InvoiceImagePreviewPage(
+                filePath: image.path,
+                fileName: image.name,
+              ),
+            ),
           ),
         );
       }
