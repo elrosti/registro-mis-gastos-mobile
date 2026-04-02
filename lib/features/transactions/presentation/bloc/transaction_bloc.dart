@@ -404,7 +404,17 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       );
 
       if (result.success) {
-        final summaryResult = await getMonthlySummaryUseCase();
+        int? year;
+        int? month;
+        if (event.startDate != null) {
+          year = event.startDate!.year;
+          month = event.startDate!.month;
+        }
+
+        final summaryResult = await getMonthlySummaryUseCase(
+          year: year,
+          month: month,
+        );
         summaryResult.fold(
           (failure) {
             developer.log(
