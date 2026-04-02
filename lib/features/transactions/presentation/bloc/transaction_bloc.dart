@@ -397,12 +397,50 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       );
 
       if (result.success) {
-        emit(InvoiceProcessingSuccess(
-          message: result.message ?? 'Gasto registrado desde imagen',
-          transaction: result.transaction,
-        ));
-        add(const TransactionFetchRequested(refresh: true));
-        add(const MonthlySummaryFetchRequested());
+        final currentFilters = _getCurrentFilters();
+
+        final summaryResult = await getMonthlySummaryUseCase();
+        summaryResult.fold(
+          (failure) {
+            developer.log(
+                'InvoiceProcessing: failed to fetch summary: ${failure.message}',
+                name: 'TransactionBloc');
+          },
+          (summary) {
+            _monthlyIncome = summary.totalIncome;
+            _monthlyExpense = summary.totalExpenses;
+          },
+        );
+
+        final transactionsResult = await getTransactionsUseCase(
+          page: 0,
+          size: _pageSize,
+          type: currentFilters.type,
+          startDate: currentFilters.startDate,
+          endDate: currentFilters.endDate,
+          categoryId: currentFilters.categoryId,
+        );
+
+        transactionsResult.fold(
+          (failure) {
+            emit(InvoiceProcessingError(
+              message: failure.message,
+            ));
+          },
+          (transactions) {
+            emit(TransactionLoaded(
+              transactions: transactions,
+              filters: currentFilters,
+              hasMore: transactions.length >= _pageSize,
+              currentPage: 0,
+              totalIncome: _monthlyIncome,
+              totalExpense: _monthlyExpense,
+            ));
+            developer.log(
+                'InvoiceProcessing: emitted TransactionLoaded with ${transactions.length} transactions, income=$_monthlyIncome, expense=$_monthlyExpense',
+                name: 'TransactionBloc');
+          },
+        );
       } else {
         emit(InvoiceProcessingError(
           message: result.error ?? 'Error al procesar la imagen',
