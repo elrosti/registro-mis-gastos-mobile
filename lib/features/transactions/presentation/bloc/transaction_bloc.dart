@@ -388,6 +388,8 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     developer.log('_onInvoiceImageProcessRequested called',
         name: 'TransactionBloc');
 
+    final currentFilters = _getCurrentFilters();
+
     emit(const InvoiceProcessing());
 
     try {
@@ -397,8 +399,6 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       );
 
       if (result.success) {
-        final currentFilters = _getCurrentFilters();
-
         final summaryResult = await getMonthlySummaryUseCase();
         summaryResult.fold(
           (failure) {
