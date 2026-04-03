@@ -156,12 +156,16 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         filters: _getCurrentFilters(),
       )),
       (transaction) {
+        final currentFilters = _getCurrentFilters();
         emit(TransactionOperationSuccess(
           message: 'Transacción creada',
           transaction: transaction,
         ));
         add(const TransactionFetchRequested(refresh: true));
-        add(const MonthlySummaryFetchRequested());
+        add(MonthlySummaryFetchRequested(
+          year: currentFilters.startDate?.year,
+          month: currentFilters.startDate?.month,
+        ));
       },
     );
   }
@@ -188,12 +192,16 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         filters: _getCurrentFilters(),
       )),
       (transaction) {
+        final currentFilters = _getCurrentFilters();
         emit(TransactionOperationSuccess(
           message: 'Transacción actualizada',
           transaction: transaction,
         ));
         add(const TransactionFetchRequested(refresh: true));
-        add(const MonthlySummaryFetchRequested());
+        add(MonthlySummaryFetchRequested(
+          year: currentFilters.startDate?.year,
+          month: currentFilters.startDate?.month,
+        ));
       },
     );
   }
@@ -210,11 +218,15 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         filters: _getCurrentFilters(),
       )),
       (_) {
+        final currentFilters = _getCurrentFilters();
         emit(const TransactionOperationSuccess(
           message: 'Transacción eliminada',
         ));
         add(const TransactionFetchRequested(refresh: true));
-        add(const MonthlySummaryFetchRequested());
+        add(MonthlySummaryFetchRequested(
+          year: currentFilters.startDate?.year,
+          month: currentFilters.startDate?.month,
+        ));
       },
     );
   }
