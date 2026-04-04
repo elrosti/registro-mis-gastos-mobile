@@ -15,7 +15,8 @@ abstract class TransactionRemoteDataSource {
     String? type,
   });
 
-  Future<MonthlySummary> getMonthlySummary({int? year, int? month});
+  Future<MonthlySummary> getMonthlySummary(
+      {int? year, int? month, DateTime? startDate, DateTime? endDate});
 
   Future<TransactionModel> getTransactionById(String id);
 
@@ -113,11 +114,16 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
   }
 
   @override
-  Future<MonthlySummary> getMonthlySummary({int? year, int? month}) async {
+  Future<MonthlySummary> getMonthlySummary(
+      {int? year, int? month, DateTime? startDate, DateTime? endDate}) async {
     try {
       final queryParams = <String, dynamic>{};
       if (year != null) queryParams['year'] = year;
       if (month != null) queryParams['month'] = month;
+      if (startDate != null)
+        queryParams['startDate'] = startDate.toIso8601String().split('T')[0];
+      if (endDate != null)
+        queryParams['endDate'] = endDate.toIso8601String().split('T')[0];
 
       final response = await _apiClient.get(
         ApiConstants.reportsMonthly,

@@ -131,7 +131,9 @@ class GetMonthlySummary {
 
   GetMonthlySummary(this.repository);
 
-  Future<Either<Failure, MonthlySummary>> call({int? year, int? month}) {
-    return repository.getMonthlySummary(year: year, month: month);
+  Future<Either<Failure, MonthlySummary>> call(
+      {int? year, int? month, DateTime? startDate, DateTime? endDate}) {
+    return repository.getMonthlySummary(
+        year: year, month: month, startDate: startDate, endDate: endDate);
   }
 }
