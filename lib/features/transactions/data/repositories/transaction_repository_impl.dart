@@ -54,10 +54,10 @@ class TransactionRepositoryImpl implements TransactionRepository {
 
   @override
   Future<Either<Failure, MonthlySummary>> getMonthlySummary(
-      {int? year, int? month}) async {
+      {int? year, int? month, DateTime? startDate, DateTime? endDate}) async {
     try {
-      final result =
-          await remoteDataSource.getMonthlySummary(year: year, month: month);
+      final result = await remoteDataSource.getMonthlySummary(
+          year: year, month: month, startDate: startDate, endDate: endDate);
       return Right(result);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));

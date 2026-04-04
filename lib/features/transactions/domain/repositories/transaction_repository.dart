@@ -14,7 +14,7 @@ abstract class TransactionRepository {
   });
 
   Future<Either<Failure, MonthlySummary>> getMonthlySummary(
-      {int? year, int? month});
+      {int? year, int? month, DateTime? startDate, DateTime? endDate});
 
   Future<Either<Failure, Transaction>> getTransactionById(String id);
 

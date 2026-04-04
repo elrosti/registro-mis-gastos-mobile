@@ -244,6 +244,27 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
 
     emit(TransactionLoading());
 
+    double totalIncome = _monthlyIncome;
+    double totalExpense = _monthlyExpense;
+
+    if (newFilters.startDate != null && newFilters.endDate != null) {
+      final summaryResult = await getMonthlySummaryUseCase(
+        startDate: newFilters.startDate,
+        endDate: newFilters.endDate,
+      );
+      summaryResult.fold(
+        (failure) {
+          developer.log(
+              'FilterChanged: failed to fetch summary: ${failure.message}',
+              name: 'TransactionBloc');
+        },
+        (summary) {
+          totalIncome = summary.totalIncome;
+          totalExpense = summary.totalExpenses;
+        },
+      );
+    }
+
     final result = await getTransactionsUseCase(
       page: 0,
       size: _pageSize,
@@ -263,8 +284,8 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         filters: newFilters,
         hasMore: transactions.length >= _pageSize,
         currentPage: 0,
-        totalIncome: _monthlyIncome,
-        totalExpense: _monthlyExpense,
+        totalIncome: totalIncome,
+        totalExpense: totalExpense,
       )),
     );
   }
@@ -274,6 +295,20 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     Emitter<TransactionState> emit,
   ) async {
     emit(const TransactionLoading());
+
+    final now = DateTime.now();
+    final summaryResult = await getMonthlySummaryUseCase(
+      year: now.year,
+      month: now.month,
+    );
+
+    summaryResult.fold(
+      (failure) {},
+      (summary) {
+        _monthlyIncome = summary.totalIncome;
+        _monthlyExpense = summary.totalExpenses;
+      },
+    );
 
     final result = await getTransactionsUseCase(
       page: 0,
@@ -290,6 +325,8 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         filters: const TransactionFilters(),
         hasMore: transactions.length >= _pageSize,
         currentPage: 0,
+        totalIncome: _monthlyIncome,
+        totalExpense: _monthlyExpense,
       )),
     );
   }
